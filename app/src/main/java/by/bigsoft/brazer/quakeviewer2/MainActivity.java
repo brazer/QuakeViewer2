@@ -150,7 +150,6 @@ public class MainActivity extends ActionBarActivity
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            //list = (ListView) rootView.findViewById(R.id.listQuake);
             list = (PullToRefreshListView) rootView.findViewById(R.id.pull_to_refresh_list);
             /*List<QuakeItem> quakes = new ArrayList<QuakeItem>();
             QuakeAdapter adapter = new QuakeAdapter(MainActivity.getContext(), quakes);
