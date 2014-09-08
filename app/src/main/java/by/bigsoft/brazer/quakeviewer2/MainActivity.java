@@ -16,18 +16,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.mapswithme.maps.api.MWMPoint;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
+import by.org.cgm.jdbf.JdbfTask;
+import by.org.cgm.quake.QuakeContent;
 import by.org.cgm.quake.QuakeContent.QuakeItem;
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks{
 
     private final String TAG_LOG = "MainActivity";
     /**
@@ -40,6 +46,7 @@ public class MainActivity extends ActionBarActivity
      */
     private CharSequence mTitle;
     private static Context mContext;
+    public static boolean isLoadedFileDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +96,7 @@ public class MainActivity extends ActionBarActivity
                 mTitle = getString(R.string.title_section3);
                 break;
             case 4:
-                mTitle = getString(R.string.title_section_localFS);
+                mTitle = getString(R.string.title_section_local_file);
                 break;
         }
     }
@@ -127,17 +134,69 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
+    public static void showAllQuakes() {
+        showQuakes(QuakeContent.QUAKES);
+    }
+
+    private static void showQuakes(List<QuakeItem> quakes) {
+        MWMPoint[] points = new MWMPoint[quakes.size()];
+        for (int i = 0; i < quakes.size(); i++)
+            points[i] = quakes.get(i).toMWMPoint();
+
+        final String title = (quakes.size()==1) ? quakes.get(0).title : "Землетрясения";
+        //todo MapsWithMeApi.showPointsOnMap(this, title, QuakeDetailActivity.getPendingIntent(this), points);
+    }
+/*
+    @Override
+    public void onTaskComplete(JdbfTask task) {
+        if (task.isCancelled())
+            Toast.makeText(this, R.string.task_cancelled, Toast.LENGTH_LONG).show();
+        else {
+            Boolean result = null;
+            try {
+                result = task.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            Toast.makeText(this,
+                    getString(R.string.task_completed, (result!=null) ? result.toString() : "null"),
+                    Toast.LENGTH_LONG).show();
+        }
+
+        if (!QuakeContent.init()) return;
+        mQuakeAdapter = new QuakeAdapter(this, QuakeContent.QUAKES);
+        PlaceholderFragment.getListView().setAdapter(mQuakeAdapter);
+    }
+
+    @Override
+    public void OnSelectedFile(String fileName) {
+        if (!fileName.contains("dbf")) {
+            Toast.makeText(this, "Выберите dbf-файл", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            AsyncTaskManager mAsyncTaskManager = new AsyncTaskManager(this, this);
+            mAsyncTaskManager.setupTask(new JdbfTask(getResources()), fileName);
+            isLoadedFileDialog = true;
+        }
+    }
+*/
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class PlaceholderFragment extends Fragment
+            implements OnTaskCompleteListener, OpenFileDialog.OpenDialogListener {
         /**
          * The fragment argument representing the section number for this
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
-        private static PullToRefreshListView list;
+        private static int mSectionNumber;
+        private PullToRefreshListView pullToRefreshlist;
+        private ListView commonList;
         private LinkedList<String> mListItems;
+        private QuakeAdapter mQuakeAdapter;
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -145,6 +204,7 @@ public class MainActivity extends ActionBarActivity
          */
         public static PlaceholderFragment newInstance(int sectionNumber) {
             PlaceholderFragment fragment = new PlaceholderFragment();
+            mSectionNumber = sectionNumber;
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
             fragment.setArguments(args);
@@ -157,26 +217,32 @@ public class MainActivity extends ActionBarActivity
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            list = (PullToRefreshListView) rootView.findViewById(R.id.pull_to_refresh_list);
-            /*List<QuakeItem> quakes = new ArrayList<QuakeItem>();
-            QuakeAdapter adapter = new QuakeAdapter(MainActivity.getContext(), quakes);
-            list.setAdapter(adapter);*/
-            list.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
-                @Override
-                public void onRefresh() {
-                    new GetDataTask().execute();
-                }
-            });
-            mListItems = new LinkedList<String>();
-            mListItems.addAll(Arrays.asList(mStrings));
+            View rootView;
+            if (mSectionNumber==4) {
+                rootView = inflater.inflate(R.layout.fragment_main_common_list, container, false);
+                commonList = (ListView) rootView.findViewById(R.id.common_listview);
+                OpenFileDialog dialog = new OpenFileDialog(MainActivity.getContext());
+                dialog.setOpenDialogListener(this);
+                dialog.show();
+            } else {
+                rootView = inflater.inflate(R.layout.fragment_main, container, false);
+                pullToRefreshlist = (PullToRefreshListView) rootView.findViewById(R.id.pull_to_refresh_list);
+                pullToRefreshlist.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        new GetDataTask().execute();
+                    }
+                });
+                mListItems = new LinkedList<String>();
+                mListItems.addAll(Arrays.asList(mStrings));
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                    MainActivity.getContext(),
-                    android.R.layout.simple_list_item_1, mListItems
-            );
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                        getContext(),
+                        android.R.layout.simple_list_item_1, mListItems
+                );
 
-            list.setAdapter(adapter);
+                pullToRefreshlist.setAdapter(adapter);
+            }
             return rootView;
         }
 
@@ -193,6 +259,52 @@ public class MainActivity extends ActionBarActivity
                 "Afuega'l Pitu", "Airag", "Airedale", "Aisy Cendre",
                 "Allgauer Emmentaler"};
 
+        @Override
+        public void onTaskComplete(JdbfTask task) {
+            if (task.isCancelled())
+                Toast.makeText(
+                        getContext(),
+                        R.string.task_cancelled,
+                        Toast.LENGTH_LONG
+                ).show();
+            else {
+                Boolean result = null;
+                try {
+                    result = task.get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+                Toast.makeText(
+                        getContext(),
+                        getString(R.string.task_completed, (result!=null) ? result.toString() : "null"),
+                        Toast.LENGTH_LONG
+                ).show();
+            }
+
+            if (!QuakeContent.init()) return;
+            mQuakeAdapter = new QuakeAdapter(getContext(), QuakeContent.QUAKES);
+            if (pullToRefreshlist!=null) pullToRefreshlist.setAdapter(mQuakeAdapter);
+            else commonList.setAdapter(mQuakeAdapter);
+        }
+
+        @Override
+        public void OnSelectedFile(String fileName) {
+            if (!fileName.contains("dbf")) {
+                Toast.makeText(
+                        MainActivity.getContext(),
+                        getString(R.string.choose_file),
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+            else {
+                AsyncTaskManager mAsyncTaskManager = new AsyncTaskManager(MainActivity.getContext(), this);
+                mAsyncTaskManager.setupTask(new JdbfTask(getResources()), fileName);
+                isLoadedFileDialog = true;
+            }
+        }
+
         private class GetDataTask extends AsyncTask<Void, Void, String[]> {
 
             @Override
@@ -208,9 +320,8 @@ public class MainActivity extends ActionBarActivity
             protected void onPostExecute(String[] result) {
                 mListItems.addFirst("Added after refresh...");
 
-                // Call onRefreshComplete when the list has been refreshed.
-                //((PullToRefreshListView) getListView()).onRefreshComplete();
-                list.onRefreshComplete();
+                // Call onRefreshComplete when the pullToRefreshlist has been refreshed.
+                if (pullToRefreshlist!=null) pullToRefreshlist.onRefreshComplete();
 
                 super.onPostExecute(result);
             }

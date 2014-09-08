@@ -29,11 +29,12 @@ public class LoadDialog extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View v = inflater.inflate(R.layout.dialog_start, null);
         builder.setView(v)
-                .setTitle("Загрузка данных")
+                .setTitle(getString(R.string.load_data))
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //todo: QuakeListActivity.isLoaded = true;
+
                         if (QuakeContent.QUAKES.size()==0) System.exit(0);
                         else dismiss();
                     }

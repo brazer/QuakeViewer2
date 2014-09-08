@@ -124,12 +124,14 @@ public class OpenFileDialog extends AlertDialog.Builder {
                             listener.OnSelectedFile(listView.getItemAtPosition(selectedIndex).toString());
                         }
                         //todo: QuakeListActivity.isLoadedFileDialog = true;
+                        MainActivity.isLoadedFileDialog = true;
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //todo: QuakeListActivity.isLoadedFileDialog = true;
+                        MainActivity.isLoadedFileDialog = true;
                     }
                 });
     }
