@@ -48,6 +48,7 @@ public class MainActivity extends ActionBarActivity
         Log.d(TAG_LOG, "onCreate");
 
         mContext = this;
+        initDB();
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
@@ -56,6 +57,10 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+    }
+
+    private void initDB() {
+        DataBaseHelper.newInstance(this);
     }
 
     public static Context getContext() {
@@ -82,6 +87,9 @@ public class MainActivity extends ActionBarActivity
                 break;
             case 3:
                 mTitle = getString(R.string.title_section3);
+                break;
+            case 4:
+                mTitle = getString(R.string.title_section_localFS);
                 break;
         }
     }
