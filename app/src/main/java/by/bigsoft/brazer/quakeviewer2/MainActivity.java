@@ -33,7 +33,8 @@ import by.org.cgm.quake.QuakeContent;
 import by.org.cgm.quake.QuakeContent.QuakeItem;
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks{
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks/*,
+        OpenFileDialog.OpenDialogListener */{
 
     private final String TAG_LOG = "MainActivity";
     /**
@@ -46,7 +47,13 @@ public class MainActivity extends ActionBarActivity
      */
     private CharSequence mTitle;
     private static Context mContext;
+    private static OpenFileDialog fileDialog;
     public static boolean isLoadedFileDialog;
+    private static QuakeAdapter mQuakeAdapter;
+
+    static {
+        isLoadedFileDialog = false;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +63,19 @@ public class MainActivity extends ActionBarActivity
 
         mContext = this;
         initDB();
+
+        if (savedInstanceState!=null) {
+            isLoadedFileDialog = savedInstanceState.getBoolean("isLocal");
+            mQuakeAdapter = (QuakeAdapter) savedInstanceState.getSerializable("adapter");
+        }
+
+        fileDialog = new OpenFileDialog(this);
+        fileDialog.setFolderIcon(getResources().getDrawable(R.drawable.abc_ic_go));
+        if (isLoadedFileDialog & savedInstanceState!=null) {
+            String path = savedInstanceState.getString("path");
+            showOpenFileDialog(path);
+        }
+
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
@@ -70,8 +90,24 @@ public class MainActivity extends ActionBarActivity
         DataBaseHelper.newInstance(this);
     }
 
+    public static void showOpenFileDialog(String path) {
+        isLoadedFileDialog = true;
+        if (path!=null) fileDialog.setCurrentPath(path);
+        fileDialog.show();
+    }
+
     public static Context getContext() {
         return mContext;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(TAG_LOG, "onSaveInstanceState");
+        outState.putBoolean("isLocal", isLoadedFileDialog);
+        String path = fileDialog.getCurrentPath();
+        outState.putCharSequence("path", path);
+        outState.putSerializable("adapter", mQuakeAdapter);
     }
 
     @Override
@@ -146,6 +182,7 @@ public class MainActivity extends ActionBarActivity
         final String title = (quakes.size()==1) ? quakes.get(0).title : "Землетрясения";
         //todo MapsWithMeApi.showPointsOnMap(this, title, QuakeDetailActivity.getPendingIntent(this), points);
     }
+
 /*
     @Override
     public void onTaskComplete(JdbfTask task) {
@@ -192,11 +229,11 @@ public class MainActivity extends ActionBarActivity
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
+        private final String TAG_LOG = "PlaceHolderFragment";
         private static int mSectionNumber;
-        private PullToRefreshListView pullToRefreshlist;
-        private ListView commonList;
-        private LinkedList<String> mListItems;
-        private QuakeAdapter mQuakeAdapter;
+        private static PullToRefreshListView pullToRefreshlist;
+        private static ListView commonList;
+        private static LinkedList<String> mListItems;
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -221,9 +258,10 @@ public class MainActivity extends ActionBarActivity
             if (mSectionNumber==4) {
                 rootView = inflater.inflate(R.layout.fragment_main_common_list, container, false);
                 commonList = (ListView) rootView.findViewById(R.id.common_listview);
-                OpenFileDialog dialog = new OpenFileDialog(MainActivity.getContext());
-                dialog.setOpenDialogListener(this);
-                dialog.show();
+                if (!MainActivity.isLoadedFileDialog) {
+                    MainActivity.fileDialog.setOpenDialogListener(this);
+                    MainActivity.showOpenFileDialog(null);
+                }
             } else {
                 rootView = inflater.inflate(R.layout.fragment_main, container, false);
                 pullToRefreshlist = (PullToRefreshListView) rootView.findViewById(R.id.pull_to_refresh_list);
@@ -249,6 +287,7 @@ public class MainActivity extends ActionBarActivity
         @Override
         public void onAttach(Activity activity) {
             super.onAttach(activity);
+            Log.d(TAG_LOG, "onAttach");
             ((MainActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
@@ -261,6 +300,7 @@ public class MainActivity extends ActionBarActivity
 
         @Override
         public void onTaskComplete(JdbfTask task) {
+            Log.d(TAG_LOG, "onTaskComplete");
             if (task.isCancelled())
                 Toast.makeText(
                         getContext(),
@@ -285,12 +325,12 @@ public class MainActivity extends ActionBarActivity
 
             if (!QuakeContent.init()) return;
             mQuakeAdapter = new QuakeAdapter(getContext(), QuakeContent.QUAKES);
-            if (pullToRefreshlist!=null) pullToRefreshlist.setAdapter(mQuakeAdapter);
-            else commonList.setAdapter(mQuakeAdapter);
+            commonList.setAdapter(mQuakeAdapter);
         }
 
         @Override
         public void OnSelectedFile(String fileName) {
+            Log.d(TAG_LOG, "OnSelectedFile");
             if (!fileName.contains("dbf")) {
                 Toast.makeText(
                         MainActivity.getContext(),
@@ -299,7 +339,7 @@ public class MainActivity extends ActionBarActivity
                 ).show();
             }
             else {
-                AsyncTaskManager mAsyncTaskManager = new AsyncTaskManager(MainActivity.getContext(), this);
+                AsyncTaskManager mAsyncTaskManager = new AsyncTaskManager(getContext(), this);
                 mAsyncTaskManager.setupTask(new JdbfTask(getResources()), fileName);
                 isLoadedFileDialog = true;
             }

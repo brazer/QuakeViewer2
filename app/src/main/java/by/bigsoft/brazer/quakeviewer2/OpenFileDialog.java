@@ -10,7 +10,9 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
@@ -34,6 +36,7 @@ import java.util.List;
 
 public class OpenFileDialog extends AlertDialog.Builder {
 
+    private final String TAG_LOG = "OpenFileDialog";
     private String currentPath = Environment.getExternalStorageDirectory().getPath();
     private FilenameFilter filenameFilter;
     private List<File> files = new ArrayList<File>();
@@ -120,18 +123,20 @@ public class OpenFileDialog extends AlertDialog.Builder {
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG_LOG, "Click PositiveButton");
                         if (selectedIndex > -1 && listener != null) {
                             listener.OnSelectedFile(listView.getItemAtPosition(selectedIndex).toString());
                         }
                         //todo: QuakeListActivity.isLoadedFileDialog = true;
-                        MainActivity.isLoadedFileDialog = true;
+                        MainActivity.isLoadedFileDialog = false;
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG_LOG, "Click NegativeButton");
                         //todo: QuakeListActivity.isLoadedFileDialog = true;
-                        MainActivity.isLoadedFileDialog = true;
+                        MainActivity.isLoadedFileDialog = false;
                     }
                 });
     }
@@ -331,6 +336,7 @@ public class OpenFileDialog extends AlertDialog.Builder {
      */
     @Override
     public AlertDialog show() {
+        Log.d(TAG_LOG, "show");
         files.addAll(getFiles(currentPath));
         listView.setAdapter(new FileAdapter(mContext, files));
         return super.show();
