@@ -25,7 +25,6 @@ import android.widget.ListView;
 import com.mapswithme.maps.api.MWMPoint;
 import com.mapswithme.maps.api.MapsWithMeApi;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import by.org.cgm.quake.QuakeContent;
@@ -112,7 +111,7 @@ public class NavigationDrawerFragment extends Fragment {
                 android.R.layout.simple_list_item_1,
                 android.R.id.text1,
                 new String[]{
-                        getString(R.string.title_section1),
+                        getString(R.string.title_earth),
                         getString(R.string.title_section2),
                         getString(R.string.title_section3),
                         getString(R.string.title_section_local_file)
@@ -261,16 +260,12 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         if (item.getItemId() == R.id.action_show_all) {
-            //MainActivity.showAllQuakes();
-            //todo: delete line:
             List<QuakeContent.QuakeItem> quakes = QuakeContent.QUAKES;
             MWMPoint[] points = new MWMPoint[quakes.size()];
             for (int i = 0; i < quakes.size(); i++)
                 points[i] = quakes.get(i).toMWMPoint();
-
-            final String title = (quakes.size()==1) ? quakes.get(0).title : "Землетрясения";
+            String title = (quakes.size()==1) ? quakes.get(0).title : "Землетрясения";
             MapsWithMeApi.showPointsOnMap(MainActivity.getActivity(), title, points);
-            //Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
             return true;
         }
 

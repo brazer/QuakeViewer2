@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -24,6 +25,7 @@ import com.mapswithme.maps.api.MWMPoint;
 import com.mapswithme.maps.api.MapsWithMeApi;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -121,7 +123,7 @@ public class MainActivity extends ActionBarActivity
     public void onSectionAttached(int number) {
         switch (number) {
             case 1:
-                mTitle = getString(R.string.title_section1);
+                mTitle = getString(R.string.title_earth);
                 break;
             case 2:
                 mTitle = getString(R.string.title_section2);
@@ -168,17 +170,13 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    public void showAllQuakes() {
-        showQuakes(QuakeContent.QUAKES);
-    }
-
-    private void showQuakes(List<QuakeItem> quakes) {
+    public static void showQuakes(List<QuakeItem> quakes) {
         MWMPoint[] points = new MWMPoint[quakes.size()];
         for (int i = 0; i < quakes.size(); i++)
             points[i] = quakes.get(i).toMWMPoint();
 
         final String title = (quakes.size()==1) ? quakes.get(0).title : "Землетрясения";
-        MapsWithMeApi.showPointsOnMap(MainActivity.this, title, points);
+        MapsWithMeApi.showPointsOnMap(mActivity, title, points);
     }
 
     /**
@@ -196,6 +194,16 @@ public class MainActivity extends ActionBarActivity
         private static PullToRefreshListView pullToRefreshlist;
         private static ListView commonList;
         private static LinkedList<String> mListItems;
+
+        private static AdapterView.OnItemClickListener itemClickListener =
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        List<QuakeItem> list = new ArrayList<QuakeItem>();
+                        list.add(mQuakeAdapter.getItem(position));
+                        MainActivity.showQuakes(list);
+                    }
+                };
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -222,6 +230,7 @@ public class MainActivity extends ActionBarActivity
             if (mSectionNumber==4) {
                 rootView = inflater.inflate(R.layout.fragment_main_common_list, container, false);
                 commonList = (ListView) rootView.findViewById(R.id.common_listview);
+                commonList.setOnItemClickListener(itemClickListener);
                 if (NavigationDrawerFragment.wasDrawerOpened) {
                     NavigationDrawerFragment.wasDrawerOpened = false;
                     if (OpenFileDialog.isClosed()) {
@@ -234,6 +243,7 @@ public class MainActivity extends ActionBarActivity
             } else {
                 rootView = inflater.inflate(R.layout.fragment_main, container, false);
                 pullToRefreshlist = (PullToRefreshListView) rootView.findViewById(R.id.pull_to_refresh_list);
+                pullToRefreshlist.setOnItemClickListener(itemClickListener);
                 pullToRefreshlist.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
@@ -347,7 +357,7 @@ public class MainActivity extends ActionBarActivity
             super(context, android.R.layout.simple_list_item_2, android.R.id.text1, quakes);
             data = quakes;
         }
-//todo: ViewHolder?
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent)
         {
