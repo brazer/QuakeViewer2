@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mapswithme.maps.api.MWMPoint;
+import com.mapswithme.maps.api.MapsWithMeApi;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -48,6 +49,7 @@ public class MainActivity extends ActionBarActivity
     private static Context mContext;
     private static OpenFileDialog fileDialog;
     private static QuakeAdapter mQuakeAdapter;
+    private static Activity mActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +58,7 @@ public class MainActivity extends ActionBarActivity
         Log.d(TAG_LOG, "onCreate");
 
         mContext = this;
+        mActivity = this;
         //initDB();
         fileDialog = new OpenFileDialog(this);
         fileDialog.setFolderIcon(getResources().getDrawable(R.drawable.abc_ic_go));
@@ -89,6 +92,10 @@ public class MainActivity extends ActionBarActivity
 
     public static Context getContext() {
         return mContext;
+    }
+
+    public static Activity getActivity() {
+        return mActivity;
     }
 
     @Override
@@ -161,17 +168,17 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    public static void showAllQuakes() {
+    public void showAllQuakes() {
         showQuakes(QuakeContent.QUAKES);
     }
 
-    private static void showQuakes(List<QuakeItem> quakes) {
+    private void showQuakes(List<QuakeItem> quakes) {
         MWMPoint[] points = new MWMPoint[quakes.size()];
         for (int i = 0; i < quakes.size(); i++)
             points[i] = quakes.get(i).toMWMPoint();
 
         final String title = (quakes.size()==1) ? quakes.get(0).title : "Землетрясения";
-        //todo MapsWithMeApi.showPointsOnMap(this, title, QuakeDetailActivity.getPendingIntent(this), points);
+        MapsWithMeApi.showPointsOnMap(MainActivity.this, title, points);
     }
 
     /**

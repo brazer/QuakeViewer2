@@ -22,6 +22,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.mapswithme.maps.api.MWMPoint;
+import com.mapswithme.maps.api.MapsWithMeApi;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import by.org.cgm.quake.QuakeContent;
+
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
@@ -253,8 +261,15 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         if (item.getItemId() == R.id.action_show_all) {
-            MainActivity.showAllQuakes();
+            //MainActivity.showAllQuakes();
             //todo: delete line:
+            List<QuakeContent.QuakeItem> quakes = QuakeContent.QUAKES;
+            MWMPoint[] points = new MWMPoint[quakes.size()];
+            for (int i = 0; i < quakes.size(); i++)
+                points[i] = quakes.get(i).toMWMPoint();
+
+            final String title = (quakes.size()==1) ? quakes.get(0).title : "Землетрясения";
+            MapsWithMeApi.showPointsOnMap(MainActivity.getActivity(), title, points);
             //Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
             return true;
         }
