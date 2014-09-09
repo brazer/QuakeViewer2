@@ -58,6 +58,7 @@ public class NavigationDrawerFragment extends Fragment {
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
+    public static boolean wasDrawerOpened = false;
 
     public NavigationDrawerFragment() {
     }
@@ -156,10 +157,11 @@ public class NavigationDrawerFragment extends Fragment {
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
+                Log.d(TAG_LOG, "onDrawerOpened");
                 if (!isAdded()) {
                     return;
                 }
-
+                wasDrawerOpened = true;
                 if (!mUserLearnedDrawer) {
                     // The user manually opened the drawer; store this flag to prevent auto-showing
                     // the navigation drawer automatically in the future.

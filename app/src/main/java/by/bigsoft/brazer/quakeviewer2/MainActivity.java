@@ -33,10 +33,9 @@ import by.org.cgm.quake.QuakeContent;
 import by.org.cgm.quake.QuakeContent.QuakeItem;
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks/*,
-        OpenFileDialog.OpenDialogListener */{
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks{
 
-    private final String TAG_LOG = "MainActivity";
+    private static final String TAG_LOG = "MainActivity";
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
@@ -48,12 +47,7 @@ public class MainActivity extends ActionBarActivity
     private CharSequence mTitle;
     private static Context mContext;
     private static OpenFileDialog fileDialog;
-    public static boolean isLoadedFileDialog;
     private static QuakeAdapter mQuakeAdapter;
-
-    static {
-        isLoadedFileDialog = false;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,20 +56,17 @@ public class MainActivity extends ActionBarActivity
         Log.d(TAG_LOG, "onCreate");
 
         mContext = this;
-        initDB();
-
-        if (savedInstanceState!=null) {
-            isLoadedFileDialog = savedInstanceState.getBoolean("isLocal");
-            mQuakeAdapter = (QuakeAdapter) savedInstanceState.getSerializable("adapter");
-        }
-
+        //initDB();
         fileDialog = new OpenFileDialog(this);
         fileDialog.setFolderIcon(getResources().getDrawable(R.drawable.abc_ic_go));
-        if (isLoadedFileDialog & savedInstanceState!=null) {
-            String path = savedInstanceState.getString("path");
-            showOpenFileDialog(path);
+        if (savedInstanceState!=null) {
+            OpenFileDialog.setIsClosed(savedInstanceState.getBoolean("isClosed"));
+            mQuakeAdapter = (QuakeAdapter) savedInstanceState.getSerializable("adapter");
+            if (!OpenFileDialog.isClosed()) {
+                String path = savedInstanceState.getString("path");
+                showOpenFileDialog(path);
+            }
         }
-
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
@@ -91,7 +82,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     public static void showOpenFileDialog(String path) {
-        isLoadedFileDialog = true;
+        Log.d(TAG_LOG, "showOpenFileDialog");
         if (path!=null) fileDialog.setCurrentPath(path);
         fileDialog.show();
     }
@@ -104,7 +95,7 @@ public class MainActivity extends ActionBarActivity
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Log.d(TAG_LOG, "onSaveInstanceState");
-        outState.putBoolean("isLocal", isLoadedFileDialog);
+        outState.putBoolean("isClosed", OpenFileDialog.isClosed());
         String path = fileDialog.getCurrentPath();
         outState.putCharSequence("path", path);
         outState.putSerializable("adapter", mQuakeAdapter);
@@ -183,42 +174,6 @@ public class MainActivity extends ActionBarActivity
         //todo MapsWithMeApi.showPointsOnMap(this, title, QuakeDetailActivity.getPendingIntent(this), points);
     }
 
-/*
-    @Override
-    public void onTaskComplete(JdbfTask task) {
-        if (task.isCancelled())
-            Toast.makeText(this, R.string.task_cancelled, Toast.LENGTH_LONG).show();
-        else {
-            Boolean result = null;
-            try {
-                result = task.get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-            Toast.makeText(this,
-                    getString(R.string.task_completed, (result!=null) ? result.toString() : "null"),
-                    Toast.LENGTH_LONG).show();
-        }
-
-        if (!QuakeContent.init()) return;
-        mQuakeAdapter = new QuakeAdapter(this, QuakeContent.QUAKES);
-        PlaceholderFragment.getListView().setAdapter(mQuakeAdapter);
-    }
-
-    @Override
-    public void OnSelectedFile(String fileName) {
-        if (!fileName.contains("dbf")) {
-            Toast.makeText(this, "Выберите dbf-файл", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            AsyncTaskManager mAsyncTaskManager = new AsyncTaskManager(this, this);
-            mAsyncTaskManager.setupTask(new JdbfTask(getResources()), fileName);
-            isLoadedFileDialog = true;
-        }
-    }
-*/
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -229,7 +184,7 @@ public class MainActivity extends ActionBarActivity
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
-        private final String TAG_LOG = "PlaceHolderFragment";
+        private static final String TAG_LOG = "PlaceHolderFragment";
         private static int mSectionNumber;
         private static PullToRefreshListView pullToRefreshlist;
         private static ListView commonList;
@@ -240,6 +195,7 @@ public class MainActivity extends ActionBarActivity
          * number.
          */
         public static PlaceholderFragment newInstance(int sectionNumber) {
+            Log.d(TAG_LOG, "newInstance");
             PlaceholderFragment fragment = new PlaceholderFragment();
             mSectionNumber = sectionNumber;
             Bundle args = new Bundle();
@@ -254,14 +210,20 @@ public class MainActivity extends ActionBarActivity
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
+            Log.d(TAG_LOG, "onCreateView");
             View rootView;
             if (mSectionNumber==4) {
                 rootView = inflater.inflate(R.layout.fragment_main_common_list, container, false);
                 commonList = (ListView) rootView.findViewById(R.id.common_listview);
-                if (!MainActivity.isLoadedFileDialog) {
-                    MainActivity.fileDialog.setOpenDialogListener(this);
-                    MainActivity.showOpenFileDialog(null);
-                }
+                if (NavigationDrawerFragment.wasDrawerOpened) {
+                    NavigationDrawerFragment.wasDrawerOpened = false;
+                    if (OpenFileDialog.isClosed()) {
+                        MainActivity.fileDialog = new OpenFileDialog(getContext());
+                        MainActivity.fileDialog.setOpenDialogListener(this);
+                        MainActivity.fileDialog.show();
+                    }
+                } else
+                    if (mQuakeAdapter!=null) commonList.setAdapter(mQuakeAdapter);
             } else {
                 rootView = inflater.inflate(R.layout.fragment_main, container, false);
                 pullToRefreshlist = (PullToRefreshListView) rootView.findViewById(R.id.pull_to_refresh_list);
@@ -288,6 +250,7 @@ public class MainActivity extends ActionBarActivity
         public void onAttach(Activity activity) {
             super.onAttach(activity);
             Log.d(TAG_LOG, "onAttach");
+            MainActivity.fileDialog.setOpenDialogListener(this);
             ((MainActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
@@ -333,7 +296,7 @@ public class MainActivity extends ActionBarActivity
             Log.d(TAG_LOG, "OnSelectedFile");
             if (!fileName.contains("dbf")) {
                 Toast.makeText(
-                        MainActivity.getContext(),
+                        getContext(),
                         getString(R.string.choose_file),
                         Toast.LENGTH_SHORT
                 ).show();
@@ -341,7 +304,6 @@ public class MainActivity extends ActionBarActivity
             else {
                 AsyncTaskManager mAsyncTaskManager = new AsyncTaskManager(getContext(), this);
                 mAsyncTaskManager.setupTask(new JdbfTask(getResources()), fileName);
-                isLoadedFileDialog = true;
             }
         }
 
