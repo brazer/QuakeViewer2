@@ -1,6 +1,7 @@
 package by.bigsoft.brazer.quakeviewer2;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -244,21 +245,40 @@ public class MainActivity extends ActionBarActivity
                 rootView = inflater.inflate(R.layout.fragment_main, container, false);
                 pullToRefreshlist = (PullToRefreshListView) rootView.findViewById(R.id.pull_to_refresh_list);
                 pullToRefreshlist.setOnItemClickListener(itemClickListener);
-                pullToRefreshlist.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        new GetDataTask().execute();
-                    }
-                });
-                mListItems = new LinkedList<String>();
-                mListItems.addAll(Arrays.asList(mStrings));
+                switch (mSectionNumber) {
+                    case 1:
+                        new GetDataTask().execute("http://brazer.url.ph/data.dbf");
+                        pullToRefreshlist.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
+                            @Override
+                            public void onRefresh() {
+                                new GetDataTask().execute("http://brazer.url.ph/data.dbf");
+                            }
+                        });
 
-                ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                        getContext(),
-                        android.R.layout.simple_list_item_1, mListItems
-                );
+                        break;
+                    case 2:
 
-                pullToRefreshlist.setAdapter(adapter);
+                    case 3:
+
+                        break;
+                    /*default:
+                        pullToRefreshlist.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
+                            @Override
+                            public void onRefresh() {
+                                new GetDataTask().execute();
+                            }
+                        });
+                        mListItems = new LinkedList<String>();
+                        mListItems.addAll(Arrays.asList(mStrings));
+
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                                getContext(),
+                                android.R.layout.simple_list_item_1, mListItems
+                        );
+
+                        pullToRefreshlist.setAdapter(adapter);
+                        break;*/
+                }
             }
             return rootView;
         }
@@ -305,7 +325,8 @@ public class MainActivity extends ActionBarActivity
 
             if (!QuakeContent.init()) return;
             mQuakeAdapter = new QuakeAdapter(getContext(), QuakeContent.QUAKES);
-            commonList.setAdapter(mQuakeAdapter);
+            if (mSectionNumber==4) commonList.setAdapter(mQuakeAdapter);
+            else pullToRefreshlist.setAdapter(mQuakeAdapter);
         }
 
         @Override
@@ -324,8 +345,27 @@ public class MainActivity extends ActionBarActivity
             }
         }
 
-        private class GetDataTask extends AsyncTask<Void, Void, String[]> {
+        private class GetDataTask extends /*AsyncTask<Void, Void, String[]>,*/ JdbfTask {
 
+            private OnTaskCompleteListener taskCompleteListener;
+
+            public GetDataTask() {
+                super(getResources());
+                taskCompleteListener = PlaceholderFragment.this;
+            }
+
+            @Override
+            protected Boolean doInBackground(String... params) {
+                return super.doInBackground(params);
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                super.onPostExecute(result);
+                taskCompleteListener.onTaskComplete(this);
+            }
+
+            /*
             @Override
             protected String[] doInBackground(Void... params) {
                 // Simulates a background job.
@@ -344,6 +384,7 @@ public class MainActivity extends ActionBarActivity
 
                 super.onPostExecute(result);
             }
+            */
         }
 
     }

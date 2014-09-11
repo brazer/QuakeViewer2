@@ -28,9 +28,7 @@ public class JdbfTask extends AsyncTask<String, String, Boolean> {
         mProgressTracker = progressTracker;
         if (mProgressTracker != null) {
             mProgressTracker.onProgress(mProgressMessage);
-            if (mResult != null) {
-                mProgressTracker.onComplete();
-            }
+            if (mResult != null) mProgressTracker.onComplete();
         }
     }
 

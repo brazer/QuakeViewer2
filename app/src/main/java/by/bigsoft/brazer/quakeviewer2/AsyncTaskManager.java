@@ -28,9 +28,7 @@ public class AsyncTaskManager implements IProgressTracker, DialogInterface.OnCan
 
     @Override
     public void onProgress(String message) {
-        if (!mProgressDialog.isShowing()) {
-            mProgressDialog.show();
-        }
+        if (!mProgressDialog.isShowing()) mProgressDialog.show();
         mProgressDialog.setMessage(message);
     }
 

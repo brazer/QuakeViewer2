@@ -10,23 +10,22 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_show_all">Show all</string>
     <string name="action_settings">Settings</string>
-
     <string name="run_task">Запуск</string>
     <string name="task_working">Загрузка (%1$d)...</string>
     <string name="task_starting">Начало...</string>
     <string name="task_cancelled">Загрузка отменена пользователем</string>
     <string name="task_completed">Данные загружены с результатом (%1$s)</string>
-
     <string name="internet_load">Загрузить из Интернета</string>
     <string name="file_load">Загрузить из файла</string>
     <string name="url">http://www.brazer.url.ph/data.dbf</string>
     <string name="load_data">Загрузка данных</string>
     <string name="exit">Выход</string>
-
     <string name="pull_to_refresh_pull_label">Pull to refresh...</string>
     <string name="pull_to_refresh_release_label">Release to refresh...</string>
     <string name="pull_to_refresh_refreshing_label">Loading...</string>
     <string name="pull_to_refresh_tap_label">Tap to refresh...</string>
     <string name="choose_file">Выберите dbf-файл</string>
+    <string name="title_activity_map">MapActivity</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>

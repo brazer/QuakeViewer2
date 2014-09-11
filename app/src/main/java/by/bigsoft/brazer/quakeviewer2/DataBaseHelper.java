@@ -45,15 +45,29 @@ public class DataBaseHelper extends SQLiteOpenHelper{
                ");";
         db.execSQL(sql);
         sql = "CREATE TABLE '"+tabEarth+"' (" +
-                "id integer primary key autoincrement," +
-                "user text not null," +
-                "pass text not null" +
+                "N integer primary key, " +
+                "DateTime text primary key, " +
+                "Latitude real not null" +
+                "Longitude real not null, " +
+                "Depth integer, " +
+                "MPSP real, " +
+                "MPLP real, " +
+                "MS real, " +
+                "Location text, " +
+                "LocationRus text" +
                 ")";
         db.execSQL(sql);
         sql = "CREATE TABLE '"+tabEurope+"' (" +
-                "id integer primary key autoincrement," +
-                "user text not null," +
-                "pass text not null" +
+                "N integer primary key, " +
+                "DateTime text primary key, " +
+                "Latitude real not null" +
+                "Longitude real not null, " +
+                "Depth integer, " +
+                "MPSP real, " +
+                "MPLP real, " +
+                "MS real, " +
+                "Location text, " +
+                "LocationRus text" +
                 ")";
         db.execSQL(sql);
     }
