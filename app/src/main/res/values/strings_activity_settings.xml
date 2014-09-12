@@ -1,0 +1,19 @@
+<resources>
+        <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_map_choice">Choose a map</string>
+    <string-array name="pref_map_list_titles">
+        <item>Maps.me</item>
+        <item>Google Maps</item>
+    </string-array>
+    <string-array name="pref_map_list_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+</resources>

@@ -1,42 +1,77 @@
 package by.bigsoft.brazer.quakeviewer2;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
+import by.org.cgm.quake.QuakeContent;
 
-public class MapActivity extends ActionBarActivity {
+public class MapActivity extends ActionBarActivity implements GoogleMap.OnMarkerClickListener {
 
-    GoogleMap map;
+    private GoogleMap map;
+    private Marker markers[];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-
+        setTitle(getString(R.string.map_activity_title));
+        setMap();
+        setMarkers(getPosition());
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.map, menu);
-        return true;
+    private void setMap() {
+        map = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentMap))
+                .getMap();
+        map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+        map.setMyLocationEnabled(true);
+        map.setOnMarkerClickListener(this);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+    private int getPosition() {
+        Intent intent = getIntent();
+        return intent.getIntExtra("position", -1);
+    }
+
+    private void setMarkers(int position) {
+        if (position==-1) {
+            int count = QuakeContent.QUAKES.size();
+            markers = new Marker[count];
+            for (int i = 0; i < count; i++)
+                setMarker(i);
+        } else {
+            markers = new Marker[1];
+            setMarker(position);
+            map.moveCamera(CameraUpdateFactory.newLatLng(markers[0].getPosition()));
         }
-        return super.onOptionsItemSelected(item);
+    }
+
+    private void setMarker(int position) {
+        QuakeContent.QuakeItem quake = QuakeContent.QUAKES.get(position);
+        double lat = quake.lat;
+        double lng = quake.lon;
+        LatLng location = new LatLng(lat, lng);
+        int i = (markers.length==1) ? 0 : position;
+        markers[i] = map.addMarker(new MarkerOptions()
+                        .position(location)
+                        .title(quake.title)
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher))
+                        .snippet(quake.content)
+        );
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+        return false;
     }
 }

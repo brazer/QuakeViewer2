@@ -27,5 +27,6 @@
     <string name="choose_file">Выберите dbf-файл</string>
     <string name="title_activity_map">MapActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="map_activity_title">Quakes</string>
 
 </resources>

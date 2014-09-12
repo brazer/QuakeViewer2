@@ -1,6 +1,7 @@
 package by.bigsoft.brazer.quakeviewer2;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
@@ -166,18 +167,25 @@ public class MainActivity extends ActionBarActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            overridePendingTransition(android.R.anim.slide_out_right, android.R.anim.slide_in_left);
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public static void showQuakes(List<QuakeItem> quakes) {
-        MWMPoint[] points = new MWMPoint[quakes.size()];
+    public static void showQuakes(/*List<QuakeItem> quakes*/ int position) {
+        /*MWMPoint[] points = new MWMPoint[quakes.size()];
         for (int i = 0; i < quakes.size(); i++)
             points[i] = quakes.get(i).toMWMPoint();
 
         final String title = (quakes.size()==1) ? quakes.get(0).title : "Землетрясения";
-        MapsWithMeApi.showPointsOnMap(mActivity, title, points);
+        MapsWithMeApi.showPointsOnMap(mActivity, title, points);*/
+        Intent intent = new Intent(getContext(), MapActivity.class);
+        intent.putExtra("position", position);
+        getActivity().overridePendingTransition(android.R.anim.fade_out, android.R.anim.fade_in);
+        getActivity().startActivity(intent);
     }
 
     /**
@@ -202,7 +210,7 @@ public class MainActivity extends ActionBarActivity
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         List<QuakeItem> list = new ArrayList<QuakeItem>();
                         list.add(mQuakeAdapter.getItem(position));
-                        MainActivity.showQuakes(list);
+                        MainActivity.showQuakes(/*list*/position-1);
                     }
                 };
 
@@ -257,11 +265,6 @@ public class MainActivity extends ActionBarActivity
 
                         break;
                     case 2:
-
-                    case 3:
-
-                        break;
-                    /*default:
                         pullToRefreshlist.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
                             @Override
                             public void onRefresh() {
@@ -277,7 +280,9 @@ public class MainActivity extends ActionBarActivity
                         );
 
                         pullToRefreshlist.setAdapter(adapter);
-                        break;*/
+                    case 3:
+
+                        break;
                 }
             }
             return rootView;

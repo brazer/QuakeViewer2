@@ -260,12 +260,8 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         if (item.getItemId() == R.id.action_show_all) {
-            List<QuakeContent.QuakeItem> quakes = QuakeContent.QUAKES;
-            MWMPoint[] points = new MWMPoint[quakes.size()];
-            for (int i = 0; i < quakes.size(); i++)
-                points[i] = quakes.get(i).toMWMPoint();
-            String title = (quakes.size()==1) ? quakes.get(0).title : "Землетрясения";
-            MapsWithMeApi.showPointsOnMap(MainActivity.getActivity(), title, points);
+            int all = -1;
+            MainActivity.showQuakes(/*QuakeContent.QUAKES*/all);
             return true;
         }
 
