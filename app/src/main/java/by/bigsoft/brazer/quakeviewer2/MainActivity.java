@@ -2,8 +2,12 @@ package by.bigsoft.brazer.quakeviewer2;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.AsyncTask;
+import android.preference.Preference;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -175,17 +179,30 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    public static void showQuakes(/*List<QuakeItem> quakes*/ int position) {
-        /*MWMPoint[] points = new MWMPoint[quakes.size()];
-        for (int i = 0; i < quakes.size(); i++)
-            points[i] = quakes.get(i).toMWMPoint();
-
-        final String title = (quakes.size()==1) ? quakes.get(0).title : "Землетрясения";
-        MapsWithMeApi.showPointsOnMap(mActivity, title, points);*/
-        Intent intent = new Intent(getContext(), MapActivity.class);
-        intent.putExtra("position", position);
-        getActivity().overridePendingTransition(android.R.anim.fade_out, android.R.anim.fade_in);
-        getActivity().startActivity(intent);
+    public static void showQuakes(int position) {
+        int map = Integer.parseInt(
+                PreferenceManager.getDefaultSharedPreferences(getContext())
+                        .getString("map_list", "0")
+        );
+        if (map==0) {
+            List<QuakeItem> quakes;
+            if (position==-1) quakes = QuakeContent.QUAKES;
+            else {
+                quakes = new ArrayList<QuakeItem>();
+                quakes.add(mQuakeAdapter.getItem(position));
+            }
+            MWMPoint[] points = new MWMPoint[quakes.size()];
+            for (int i = 0; i < quakes.size(); i++)
+                points[i] = quakes.get(i).toMWMPoint();
+            final String title = (quakes.size() == 1) ? quakes.get(0).title : "Землетрясения";
+            MapsWithMeApi.showPointsOnMap(mActivity, title, points);
+        }
+        if (map==1) {
+            Intent intent = new Intent(getContext(), MapActivity.class);
+            intent.putExtra("position", position);
+            getActivity().overridePendingTransition(android.R.anim.fade_out, android.R.anim.fade_in);
+            getActivity().startActivity(intent);
+        }
     }
 
     /**
@@ -208,9 +225,7 @@ public class MainActivity extends ActionBarActivity
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        List<QuakeItem> list = new ArrayList<QuakeItem>();
-                        list.add(mQuakeAdapter.getItem(position));
-                        MainActivity.showQuakes(/*list*/position-1);
+                        MainActivity.showQuakes(position - 1);
                     }
                 };
 
