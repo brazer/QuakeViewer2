@@ -2,6 +2,7 @@ package by.org.cgm.jdbf;
 
 import android.content.res.Resources;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -12,6 +13,7 @@ import by.bigsoft.brazer.quakeviewer2.R;
 
 public class JdbfTask extends AsyncTask<String, String, Boolean> {
 
+    private final static String TAG_LOG = "JdbfTask";
     public static ArrayList<QuakeRecord> records;
     private static DBFReader reader;
     protected final Resources mResources;
@@ -66,6 +68,7 @@ public class JdbfTask extends AsyncTask<String, String, Boolean> {
 
     @Override
     protected Boolean doInBackground(String... params) {
+        Log.d(TAG_LOG, "doInBackground");
         if (params[0].contains("http:")) readFromUrl(params[0]);
         else readFromFile(params[0]);
         boolean res = false;
@@ -80,20 +83,22 @@ public class JdbfTask extends AsyncTask<String, String, Boolean> {
     }
 
     private void readFromUrl(String strUrl) {
+        Log.d(TAG_LOG, "readFromUrl");
         try {
             URL url = new URL(strUrl);
             reader = new DBFReader(url.openStream());
         }
         catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG_LOG, e.getMessage());
         }
     }
 
     private void readFromFile(String fileName) {
+        Log.d(TAG_LOG, "readFromFile");
         try {
             reader = new DBFReader(fileName);
         } catch (JDBFException e) {
-            e.printStackTrace();
+            Log.e(TAG_LOG, e.getMessage());
         }
     }
 

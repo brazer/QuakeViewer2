@@ -1,12 +1,9 @@
 package by.bigsoft.brazer.quakeviewer2;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.os.AsyncTask;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -32,8 +29,6 @@ import com.mapswithme.maps.api.MapsWithMeApi;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -58,6 +53,7 @@ public class MainActivity extends ActionBarActivity
     private static OpenFileDialog fileDialog;
     private static QuakeAdapter mQuakeAdapter;
     private static Activity mActivity;
+    private static SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +63,8 @@ public class MainActivity extends ActionBarActivity
 
         mContext = this;
         mActivity = this;
-        //initDB();
+        initFirst();
+        initDB();
         fileDialog = new OpenFileDialog(this);
         fileDialog.setFolderIcon(getResources().getDrawable(R.drawable.abc_ic_go));
         if (savedInstanceState!=null) {
@@ -88,8 +85,46 @@ public class MainActivity extends ActionBarActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
     }
 
+    private void initFirst() {
+        if (isFirstStarted()) {
+            Log.i(TAG_LOG, "First start");
+            AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
+            dlgAlert.setTitle("First start");
+            dlgAlert.setMessage("You can set a map in settings.");
+            dlgAlert.setPositiveButton(android.R.string.ok, null);
+            dlgAlert.setCancelable(true);
+            dlgAlert.create().show();
+        }
+    }
+
+    private static boolean isFirstStarted() {
+        mSharedPreferences = getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+        return mSharedPreferences.getBoolean("first_start", true);
+    }
+
     private void initDB() {
         DataBaseHelper.newInstance(this);
+        if (isFirstStarted()) {
+            AsyncTaskManager manager = new AsyncTaskManager(this, new OnTaskCompleteListener() {
+                @Override
+                public void onTaskComplete(JdbfTask task) {
+                    for (JdbfTask.QuakeRecord rec : JdbfTask.records)
+                        DataBaseHelper.addQuake(rec);
+                    mSharedPreferences.edit().putBoolean("first_start", false).commit();
+                    DataBaseTask.setOnTaskCompleteListener(PlaceholderFragment.getPlaceholderFragment());
+                    new DataBaseTask().execute(0);
+                }
+            });
+            manager.setupTask(new JdbfTask(getResources()), "http://brazer.url.ph/earth.dbf");
+            manager = new AsyncTaskManager(this, new OnTaskCompleteListener() {
+                @Override
+                public void onTaskComplete(JdbfTask task) {
+                    for (JdbfTask.QuakeRecord rec : JdbfTask.records)
+                        DataBaseHelper.addQuake(rec);
+                }
+            });
+            manager.setupTask(new JdbfTask(getResources()), "http://brazer.url.ph/belarus.dbf");
+        }
     }
 
     public static void showOpenFileDialog(String path) {
@@ -132,12 +167,9 @@ public class MainActivity extends ActionBarActivity
                 mTitle = getString(R.string.title_earth);
                 break;
             case 2:
-                mTitle = getString(R.string.title_section2);
+                mTitle = getString(R.string.title_belarus);
                 break;
             case 3:
-                mTitle = getString(R.string.title_section3);
-                break;
-            case 4:
                 mTitle = getString(R.string.title_section_local_file);
                 break;
         }
@@ -209,7 +241,7 @@ public class MainActivity extends ActionBarActivity
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment
-            implements OnTaskCompleteListener, OpenFileDialog.OpenDialogListener {
+            implements OnTaskCompleteListener, DataBaseTask.OnTaskCompleteListener, OpenFileDialog.OpenDialogListener {
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -217,9 +249,9 @@ public class MainActivity extends ActionBarActivity
         private static final String ARG_SECTION_NUMBER = "section_number";
         private static final String TAG_LOG = "PlaceHolderFragment";
         private static int mSectionNumber;
+        private static PlaceholderFragment mPlaceholderFragment;
         private static PullToRefreshListView pullToRefreshlist;
         private static ListView commonList;
-        private static LinkedList<String> mListItems;
 
         private static AdapterView.OnItemClickListener itemClickListener =
                 new AdapterView.OnItemClickListener() {
@@ -229,6 +261,10 @@ public class MainActivity extends ActionBarActivity
                     }
                 };
 
+        public static PlaceholderFragment getPlaceholderFragment() {
+            return mPlaceholderFragment;
+        }
+
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -236,6 +272,7 @@ public class MainActivity extends ActionBarActivity
         public static PlaceholderFragment newInstance(int sectionNumber) {
             Log.d(TAG_LOG, "newInstance");
             PlaceholderFragment fragment = new PlaceholderFragment();
+            mPlaceholderFragment = fragment;
             mSectionNumber = sectionNumber;
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -251,7 +288,7 @@ public class MainActivity extends ActionBarActivity
                 Bundle savedInstanceState) {
             Log.d(TAG_LOG, "onCreateView");
             View rootView;
-            if (mSectionNumber==4) {
+            if (mSectionNumber==3) {
                 rootView = inflater.inflate(R.layout.fragment_main_common_list, container, false);
                 commonList = (ListView) rootView.findViewById(R.id.common_listview);
                 commonList.setOnItemClickListener(itemClickListener);
@@ -268,35 +305,27 @@ public class MainActivity extends ActionBarActivity
                 rootView = inflater.inflate(R.layout.fragment_main, container, false);
                 pullToRefreshlist = (PullToRefreshListView) rootView.findViewById(R.id.pull_to_refresh_list);
                 pullToRefreshlist.setOnItemClickListener(itemClickListener);
+                DataBaseTask.setOnTaskCompleteListener(this);
                 switch (mSectionNumber) {
                     case 1:
-                        new GetDataTask().execute("http://brazer.url.ph/data.dbf");
+                        if (!MainActivity.isFirstStarted()) {
+                            new DataBaseTask().execute(0);
+                        }
                         pullToRefreshlist.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
                             @Override
                             public void onRefresh() {
-                                new GetDataTask().execute("http://brazer.url.ph/data.dbf");
+                                new GetDataTask().execute(Constants.URL_EARTH);
                             }
                         });
-
                         break;
                     case 2:
+                        new DataBaseTask().execute(1);
                         pullToRefreshlist.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
                             @Override
                             public void onRefresh() {
-                                new GetDataTask().execute();
+                                new GetDataTask().execute(Constants.URL_BLR);
                             }
                         });
-                        mListItems = new LinkedList<String>();
-                        mListItems.addAll(Arrays.asList(mStrings));
-
-                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                                getContext(),
-                                android.R.layout.simple_list_item_1, mListItems
-                        );
-
-                        pullToRefreshlist.setAdapter(adapter);
-                    case 3:
-
                         break;
                 }
             }
@@ -311,12 +340,6 @@ public class MainActivity extends ActionBarActivity
             ((MainActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
-
-        private String[] mStrings = {
-                "Abbaye de Belloc", "Abbaye du Mont des Cats", "Abertam",
-                "Abondance", "Ackawi", "Acorn", "Adelost", "Affidelice au Chablis",
-                "Afuega'l Pitu", "Airag", "Airedale", "Aisy Cendre",
-                "Allgauer Emmentaler"};
 
         @Override
         public void onTaskComplete(JdbfTask task) {
@@ -342,10 +365,17 @@ public class MainActivity extends ActionBarActivity
                         Toast.LENGTH_LONG
                 ).show();
             }
-
             if (!QuakeContent.init()) return;
             mQuakeAdapter = new QuakeAdapter(getContext(), QuakeContent.QUAKES);
-            if (mSectionNumber==4) commonList.setAdapter(mQuakeAdapter);
+            if (mSectionNumber == 3) commonList.setAdapter(mQuakeAdapter);
+            else Log.e(TAG_LOG, "The section number is wrong.");
+        }
+
+        @Override
+        public void OnTaskComplete() {
+            Log.d(TAG_LOG, "onTaskComplete");
+            mQuakeAdapter = new QuakeAdapter(getContext(), QuakeContent.QUAKES);
+            if (mSectionNumber == 3) Log.e(TAG_LOG, "The section number is wrong.");
             else pullToRefreshlist.setAdapter(mQuakeAdapter);
         }
 
@@ -365,7 +395,7 @@ public class MainActivity extends ActionBarActivity
             }
         }
 
-        private class GetDataTask extends /*AsyncTask<Void, Void, String[]>,*/ JdbfTask {
+        private class GetDataTask extends JdbfTask {
 
             private OnTaskCompleteListener taskCompleteListener;
 
@@ -385,26 +415,6 @@ public class MainActivity extends ActionBarActivity
                 taskCompleteListener.onTaskComplete(this);
             }
 
-            /*
-            @Override
-            protected String[] doInBackground(Void... params) {
-                // Simulates a background job.
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {}
-                return mStrings;
-            }
-
-            @Override
-            protected void onPostExecute(String[] result) {
-                mListItems.addFirst("Added after refresh...");
-
-                // Call onRefreshComplete when the pullToRefreshlist has been refreshed.
-                if (pullToRefreshlist!=null) pullToRefreshlist.onRefreshComplete();
-
-                super.onPostExecute(result);
-            }
-            */
         }
 
     }

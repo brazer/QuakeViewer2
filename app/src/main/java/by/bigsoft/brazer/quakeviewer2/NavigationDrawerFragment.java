@@ -22,13 +22,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.mapswithme.maps.api.MWMPoint;
-import com.mapswithme.maps.api.MapsWithMeApi;
-
-import java.util.List;
-
-import by.org.cgm.quake.QuakeContent;
-
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
@@ -112,8 +105,7 @@ public class NavigationDrawerFragment extends Fragment {
                 android.R.id.text1,
                 new String[]{
                         getString(R.string.title_earth),
-                        getString(R.string.title_section2),
-                        getString(R.string.title_section3),
+                        getString(R.string.title_belarus),
                         getString(R.string.title_section_local_file)
                 }));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);

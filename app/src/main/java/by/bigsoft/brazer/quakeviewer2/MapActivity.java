@@ -64,7 +64,7 @@ public class MapActivity extends ActionBarActivity implements GoogleMap.OnMarker
         markers[i] = map.addMarker(new MarkerOptions()
                         .position(location)
                         .title(quake.title)
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher))
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.images))
                         .snippet(quake.content)
         );
     }
