@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">QuakeViewer2</string>
+    <string name="app_name">Quake Viewer</string>
     <string name="title_earth">Earth</string>
     <string name="title_belarus">Belarus</string>
     <string name="title_section_local_file">Local file</string>
@@ -14,18 +14,14 @@
     <string name="task_starting">Начало...</string>
     <string name="task_cancelled">Загрузка отменена пользователем</string>
     <string name="task_completed">Данные загружены с результатом (%1$s)</string>
-    <string name="internet_load">Загрузить из Интернета</string>
-    <string name="file_load">Загрузить из файла</string>
-    <string name="url">http://www.brazer.url.ph/data.dbf</string>
-    <string name="load_data">Загрузка данных</string>
-    <string name="exit">Выход</string>
     <string name="pull_to_refresh_pull_label">Pull to refresh...</string>
     <string name="pull_to_refresh_release_label">Release to refresh...</string>
     <string name="pull_to_refresh_refreshing_label">Loading...</string>
     <string name="pull_to_refresh_tap_label">Tap to refresh...</string>
     <string name="choose_file">Выберите dbf-файл</string>
-    <string name="title_activity_map">MapActivity</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_map">Google Map</string>
     <string name="map_activity_title">Quakes</string>
+    <string name="first_message">You can set a map in settings. Internet is necessary to initialise data. </string>
+    <string name="title_first_message">First start</string>
 
 </resources>

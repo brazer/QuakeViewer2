@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -89,8 +91,8 @@ public class MainActivity extends ActionBarActivity
         if (isFirstStarted()) {
             Log.i(TAG_LOG, "First start");
             AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
-            dlgAlert.setTitle("First start");
-            dlgAlert.setMessage("You can set a map in settings.");
+            dlgAlert.setTitle(getString(R.string.title_first_message));
+            dlgAlert.setMessage(getString(R.string.first_message));
             dlgAlert.setPositiveButton(android.R.string.ok, null);
             dlgAlert.setCancelable(true);
             dlgAlert.create().show();
@@ -105,9 +107,14 @@ public class MainActivity extends ActionBarActivity
     private void initDB() {
         DataBaseHelper.newInstance(this);
         if (isFirstStarted()) {
+            if (!isInternetConnected()) {
+                Toast.makeText(this, "Please, check internet connection", Toast.LENGTH_SHORT).show();
+                System.exit(-1);
+            }
             AsyncTaskManager manager = new AsyncTaskManager(this, new OnTaskCompleteListener() {
                 @Override
                 public void onTaskComplete(JdbfTask task) {
+                    if (JdbfTask.records==null) return;
                     for (JdbfTask.QuakeRecord rec : JdbfTask.records)
                         DataBaseHelper.addQuake(rec);
                     mSharedPreferences.edit().putBoolean("first_start", false).commit();
@@ -125,6 +132,13 @@ public class MainActivity extends ActionBarActivity
             });
             manager.setupTask(new JdbfTask(getResources()), "http://brazer.url.ph/belarus.dbf");
         }
+    }
+
+    private boolean isInternetConnected() {
+        ConnectivityManager conMan =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = conMan.getActiveNetworkInfo();
+        return info!=null && info.isConnected();
     }
 
     public static void showOpenFileDialog(String path) {
@@ -308,9 +322,7 @@ public class MainActivity extends ActionBarActivity
                 DataBaseTask.setOnTaskCompleteListener(this);
                 switch (mSectionNumber) {
                     case 1:
-                        if (!MainActivity.isFirstStarted()) {
-                            new DataBaseTask().execute(0);
-                        }
+                        if (!MainActivity.isFirstStarted()) new DataBaseTask().execute(0);
                         pullToRefreshlist.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
                             @Override
                             public void onRefresh() {
@@ -343,7 +355,7 @@ public class MainActivity extends ActionBarActivity
 
         @Override
         public void onTaskComplete(JdbfTask task) {
-            Log.d(TAG_LOG, "onTaskComplete");
+            Log.d(TAG_LOG, "onTaskComplete()");
             if (task.isCancelled())
                 Toast.makeText(
                         getContext(),
@@ -411,10 +423,26 @@ public class MainActivity extends ActionBarActivity
 
             @Override
             protected void onPostExecute(Boolean result) {
-                super.onPostExecute(result);
-                taskCompleteListener.onTaskComplete(this);
+                pullToRefreshlist.onRefreshComplete();
+                if (result) {
+                    taskCompleteListener.onTaskComplete(this);
+                    super.onPostExecute(result);
+                    if (mSectionNumber-1==Constants.Area.EARTH.ordinal())
+                        DataBaseHelper.deleteRecords(Constants.Area.EARTH);
+                    if (mSectionNumber-1==Constants.Area.BELARUS.ordinal())
+                        DataBaseHelper.deleteRecords(Constants.Area.BELARUS);
+                    for (QuakeRecord rec : GetDataTask.records)
+                        DataBaseHelper.addQuake(rec);
+                } else
+                    Toast.makeText(getContext(), "Data weren't updated :(", Toast.LENGTH_LONG)
+                            .show();
             }
 
+            @Override
+            protected void onCancelled() {
+                super.onCancelled();
+                pullToRefreshlist.onRefreshComplete();
+            }
         }
 
     }

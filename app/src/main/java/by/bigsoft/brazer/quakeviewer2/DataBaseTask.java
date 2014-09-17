@@ -59,16 +59,15 @@ public class DataBaseTask extends AsyncTask<Integer, Void, Cursor>{
         int M = cursor.getColumnIndex("M");
         StringBuilder builder = new StringBuilder();
         builder
-                .append("Дата: ")
                 .append(cursor.getString(date))
-                .append(", время: ")
+                .append(" ")
                 .append(cursor.getString(time));
         String strM = cursor.getString(M);
         if (!strM.contains("0.0"))
-            builder.append(", магнитуда: ").append(strM);
+            builder.append("\nМагнитуда: ").append(strM);
         String strKp = cursor.getString(Kp);
         if (!strKp.contains("0"))
-            builder.append(", класс: ").append(strKp);
+            builder.append("\nКласс: ").append(strKp);
         String content = builder.toString();
         QuakeContent.QUAKES.add(new QuakeContent.QuakeItem(
                 cursor.getString(N),
@@ -90,14 +89,13 @@ public class DataBaseTask extends AsyncTask<Integer, Void, Cursor>{
         int location = cursor.getColumnIndex("LocationRus");
         StringBuilder builder = new StringBuilder();
         builder
-                .append("Дата/Время: ")
                 .append(cursor.getString(datetime));
         String strMag = cursor.getString(mag);
         if (!strMag.contains("0.0"))
-            builder.append(", магнитуда: ").append(strMag);
+            builder.append("\nМагнитуда: ").append(strMag);
         String strDep = cursor.getString(depth);
         if (!strDep.contains("0"))
-            builder.append(", глубина: ").append(strDep).append(" км");
+            builder.append("\nГлубина: ").append(strDep).append(" км");
         String content = builder.toString();
         String strLoc = cursor.getString(location);
         if (strLoc.equals("")) strLoc = cursor.getString(locEng);

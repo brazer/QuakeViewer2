@@ -130,4 +130,10 @@ public class DataBaseHelper extends SQLiteOpenHelper{
         db.insert(tabEarth, null, contentValues);
     }
 
+    public static void deleteRecords(Constants.Area area) {
+        SQLiteDatabase db = mDBHelper.getWritableDatabase();
+        if (area==Constants.Area.EARTH) db.delete(tabEarth, null, null);
+        if (area==Constants.Area.BELARUS) db.delete(tabBLR, null, null);
+    }
+
 }
