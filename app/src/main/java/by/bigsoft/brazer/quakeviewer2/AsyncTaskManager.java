@@ -40,10 +40,11 @@ public class AsyncTaskManager implements IProgressTracker, DialogInterface.OnCan
      */
     @Override
     public void onCancel(DialogInterface dialog) {
+        mProgressDialog.dismiss();
         mAsyncTask.cancel(true);
         mTaskCompleteListener.onTaskComplete(mAsyncTask);
         mAsyncTask = null;
-        dialog.dismiss();
+        if (dialog!=null) dialog.dismiss();
     }
 
     @Override

@@ -2,6 +2,7 @@ package by.bigsoft.brazer.quakeviewer2;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
@@ -108,29 +109,43 @@ public class MainActivity extends ActionBarActivity
         DataBaseHelper.newInstance(this);
         if (isFirstStarted()) {
             if (!isInternetConnected()) {
-                Toast.makeText(this, "Please, check internet connection", Toast.LENGTH_SHORT).show();
-                System.exit(-1);
-            }
-            AsyncTaskManager manager = new AsyncTaskManager(this, new OnTaskCompleteListener() {
+                AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
+                dlgAlert.setTitle(getString(R.string.title_first_message));
+                dlgAlert.setMessage("Check internet connection");
+                dlgAlert.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.exit(-1);
+                    }
+                });
+                dlgAlert.setCancelable(true);
+                dlgAlert.create().show();
+            } else Log.i(TAG_LOG, "Internet is connected. May be :(");
+            final AsyncTaskManager manBLR = new AsyncTaskManager(this, new OnTaskCompleteListener() {
                 @Override
                 public void onTaskComplete(JdbfTask task) {
                     if (JdbfTask.records==null) return;
                     for (JdbfTask.QuakeRecord rec : JdbfTask.records)
                         DataBaseHelper.addQuake(rec);
-                    mSharedPreferences.edit().putBoolean("first_start", false).commit();
-                    DataBaseTask.setOnTaskCompleteListener(PlaceholderFragment.getPlaceholderFragment());
-                    new DataBaseTask().execute(0);
                 }
             });
-            manager.setupTask(new JdbfTask(getResources()), "http://brazer.url.ph/earth.dbf");
-            manager = new AsyncTaskManager(this, new OnTaskCompleteListener() {
+            AsyncTaskManager manEarth = new AsyncTaskManager(this, new OnTaskCompleteListener() {
                 @Override
                 public void onTaskComplete(JdbfTask task) {
-                    for (JdbfTask.QuakeRecord rec : JdbfTask.records)
-                        DataBaseHelper.addQuake(rec);
+                    if (JdbfTask.records==null) {
+                        Toast.makeText(getContext(), "Please, check internet connection", Toast.LENGTH_SHORT).show();
+                        manBLR.onCancel(null);
+                    } else {
+                        for (JdbfTask.QuakeRecord rec : JdbfTask.records)
+                            DataBaseHelper.addQuake(rec);
+                        mSharedPreferences.edit().putBoolean("first_start", false).commit();
+                        DataBaseTask.setOnTaskCompleteListener(PlaceholderFragment.getPlaceholderFragment());
+                        new DataBaseTask().execute(0);
+                    }
                 }
             });
-            manager.setupTask(new JdbfTask(getResources()), "http://brazer.url.ph/belarus.dbf");
+            manEarth.setupTask(new JdbfTask(getResources()), Constants.URL_EARTH);
+            manBLR.setupTask(new JdbfTask(getResources()), Constants.URL_BLR);
         }
     }
 
@@ -138,7 +153,10 @@ public class MainActivity extends ActionBarActivity
         ConnectivityManager conMan =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = conMan.getActiveNetworkInfo();
-        return info!=null && info.isConnected();
+        if (info==null) return false;
+        if (!info.isConnected()) return false;
+        if (!info.isAvailable()) return false;
+        return true;
     }
 
     public static void showOpenFileDialog(String path) {
