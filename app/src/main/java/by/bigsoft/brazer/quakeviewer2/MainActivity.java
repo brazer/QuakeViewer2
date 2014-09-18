@@ -398,7 +398,7 @@ public class MainActivity extends ActionBarActivity
             if (!QuakeContent.init()) return;
             mQuakeAdapter = new QuakeAdapter(getContext(), QuakeContent.QUAKES);
             if (mSectionNumber == 3) commonList.setAdapter(mQuakeAdapter);
-            else Log.e(TAG_LOG, "The section number is wrong.");
+            else pullToRefreshlist.setAdapter(mQuakeAdapter);
         }
 
         @Override
@@ -442,9 +442,9 @@ public class MainActivity extends ActionBarActivity
             @Override
             protected void onPostExecute(Boolean result) {
                 pullToRefreshlist.onRefreshComplete();
+                super.onPostExecute(result);
                 if (result) {
                     taskCompleteListener.onTaskComplete(this);
-                    super.onPostExecute(result);
                     if (mSectionNumber-1==Constants.Area.EARTH.ordinal())
                         DataBaseHelper.deleteRecords(Constants.Area.EARTH);
                     if (mSectionNumber-1==Constants.Area.BELARUS.ordinal())

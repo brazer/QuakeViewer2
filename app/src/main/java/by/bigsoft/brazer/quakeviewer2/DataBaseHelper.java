@@ -15,7 +15,7 @@ public class DataBaseHelper extends SQLiteOpenHelper{
     private static DataBaseHelper mDBHelper;
     private static String mName = "QuakeDB.db";
     private static String tabBLR = "Belarus", tabEarth = "Earth", tabEurope = "Europe";
-    private static int mVersion = 1;
+    private static int mVersion = 3;
 
     public static void newInstance(Context context) {
         mDBHelper = new DataBaseHelper(context, mName, null, mVersion);
@@ -31,7 +31,7 @@ public class DataBaseHelper extends SQLiteOpenHelper{
         Log.d(TAG_LOG, "onCreate");
         String sql = "CREATE TABLE '"+tabBLR+"' (" +
                 "N integer, " +
-                "Date text primary key, " +
+                "Date text, " +
                 "Time text, " +
                 "Latitude real not null, " +
                 "Longitude real not null, " +
@@ -39,12 +39,13 @@ public class DataBaseHelper extends SQLiteOpenHelper{
                 "Delta real, " +
                 "Kp integer, " +
                 "M real not null, " +
-                "Location text" +
+                "Location text, " +
+                "primary key (N, Date)" +
                ");";
         db.execSQL(sql);
         sql = "CREATE TABLE '"+tabEarth+"' (" +
                 "N integer, " +
-                "DateTime text primary key, " +
+                "DateTime text, " +
                 "Latitude real not null, " +
                 "Longitude real not null, " +
                 "Depth integer, " +
@@ -73,6 +74,13 @@ public class DataBaseHelper extends SQLiteOpenHelper{
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d(TAG_LOG, "onUpgrade");
+        String sql = "drop table if exists " + tabBLR;
+        db.execSQL(sql);
+        sql = "drop table if exists " + tabEurope;
+        db.execSQL(sql);
+        sql = "drop table if exists " + tabEarth;
+        db.execSQL(sql);
+        onCreate(db);
     }
 
     public static Cursor getQuakes() {
