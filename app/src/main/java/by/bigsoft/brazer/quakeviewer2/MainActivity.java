@@ -138,10 +138,10 @@ public class MainActivity extends ActionBarActivity
                     } else {
                         for (JdbfTask.QuakeRecord rec : JdbfTask.records)
                             DataBaseHelper.addQuake(rec);
-                        mSharedPreferences.edit().putBoolean("first_start", false).commit();
                         DataBaseTask.setOnTaskCompleteListener(PlaceholderFragment.getPlaceholderFragment());
-                        new DataBaseTask().execute(0);
                     }
+                    mSharedPreferences.edit().putBoolean("first_start", false).commit();
+                    new DataBaseTask().execute(0);
                 }
             });
             manEarth.setupTask(new JdbfTask(getResources()), Constants.URL_EARTH);
