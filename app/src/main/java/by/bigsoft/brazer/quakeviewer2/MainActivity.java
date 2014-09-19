@@ -94,7 +94,12 @@ public class MainActivity extends ActionBarActivity
             AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
             dlgAlert.setTitle(getString(R.string.title_first_message));
             dlgAlert.setMessage(getString(R.string.first_message));
-            dlgAlert.setPositiveButton(android.R.string.ok, null);
+            dlgAlert.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    showSettings();
+                }
+            });
             dlgAlert.setCancelable(true);
             dlgAlert.create().show();
         }
@@ -235,12 +240,15 @@ public class MainActivity extends ActionBarActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            overridePendingTransition(android.R.anim.slide_out_right, android.R.anim.slide_in_left);
-            startActivity(intent);
+            showSettings();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showSettings() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 
     public static void showQuakes(int position) {
