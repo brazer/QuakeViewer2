@@ -266,7 +266,8 @@ public class MainActivity extends ActionBarActivity
             MWMPoint[] points = new MWMPoint[quakes.size()];
             for (int i = 0; i < quakes.size(); i++)
                 points[i] = quakes.get(i).toMWMPoint();
-            final String title = (quakes.size() == 1) ? quakes.get(0).title : "Землетрясения";
+            final String title = (quakes.size() == 1) ? quakes.get(0).title :
+                    getContext().getResources().getString(R.string.title_activity_map);
             MapsWithMeApi.showPointsOnMap(mActivity, title, points);
         }
         if (map==Constants.Map.Google_Maps.ordinal()) {

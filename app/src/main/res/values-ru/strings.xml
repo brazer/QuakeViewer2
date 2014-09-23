@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Просмоторщик землетрясений</string>
+    <string name="title_earth">Земля</string>
+    <string name="title_belarus">Беларусь</string>
+    <string name="title_section_local_file">Локальный файл</string>
+    <string name="navigation_drawer_open">Открыть панель навигации</string>
+    <string name="navigation_drawer_close">Закрыть панель навигации</string>
+    <string name="action_show_all">Показать всё</string>
+    <string name="action_settings">Настройки</string>
+    <string name="run_task">Запуск</string>
+    <string name="task_working">Загрузка (%1$d)...</string>
+    <string name="task_starting">Начало...</string>
+    <string name="task_cancelled">Загрузка отменена пользователем</string>
+    <string name="task_completed">Данные загружены с результатом (%1$s)</string>
+    <string name="pull_to_refresh_pull_label">Потянуть, чтобы обновить...</string>
+    <string name="pull_to_refresh_release_label">Отпустить, чтобы обновить...</string>
+    <string name="pull_to_refresh_refreshing_label">Загрузка...</string>
+    <string name="pull_to_refresh_tap_label">Коснутся, чтобы обновить...</string>
+    <string name="choose_file">Выберите dbf-файл</string>
+    <string name="title_activity_map">Google Map</string>
+    <string name="map_activity_title">Землетрясении</string>
+    <string name="first_message">В настройках можете выбрать карту. Для инициализации данных необходим интернет.</string>
+    <string name="title_first_message">Первый запуск</string>
+
+</resources>
