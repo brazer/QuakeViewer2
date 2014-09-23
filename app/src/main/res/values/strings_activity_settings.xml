@@ -8,8 +8,8 @@
 
     <string name="pref_title_map_choice">Choose a map</string>
     <string-array name="pref_map_list_titles">
-        <item>Maps.me</item>
         <item>Google Maps</item>
+        <item>MAPS.ME</item>
     </string-array>
     <string-array name="pref_map_list_values">
         <item>0</item>

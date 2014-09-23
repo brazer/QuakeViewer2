@@ -256,7 +256,7 @@ public class MainActivity extends ActionBarActivity
                 PreferenceManager.getDefaultSharedPreferences(getContext())
                         .getString("map_list", "0")
         );
-        if (map==0) {
+        if (map==Constants.Map.Maps_ME.ordinal()) {
             List<QuakeItem> quakes;
             if (position==-1) quakes = QuakeContent.QUAKES;
             else {
@@ -269,7 +269,7 @@ public class MainActivity extends ActionBarActivity
             final String title = (quakes.size() == 1) ? quakes.get(0).title : "Землетрясения";
             MapsWithMeApi.showPointsOnMap(mActivity, title, points);
         }
-        if (map==1) {
+        if (map==Constants.Map.Google_Maps.ordinal()) {
             Intent intent = new Intent(getContext(), MapActivity.class);
             intent.putExtra("position", position);
             getActivity().overridePendingTransition(android.R.anim.fade_out, android.R.anim.fade_in);

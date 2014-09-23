@@ -6,4 +6,5 @@ public class Constants {
     public static final String URL_BLR = "http://brazer.url.ph/belarus.dbf";
 
     public enum Area { EARTH, BELARUS }
+    public enum Map { Google_Maps, Maps_ME }
 }
