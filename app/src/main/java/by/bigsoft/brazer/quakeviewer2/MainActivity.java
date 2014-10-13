@@ -298,7 +298,8 @@ public class MainActivity extends ActionBarActivity
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        MainActivity.showQuakes(position - 1);
+                        int pos = (mSectionNumber==3) ? position : position - 1;
+                        MainActivity.showQuakes(pos);
                     }
                 };
 
