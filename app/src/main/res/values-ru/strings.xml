@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Просмоторщик землетрясений</string>
     <string name="title_earth">Земля</string>
     <string name="title_belarus">Беларусь</string>
     <string name="title_section_local_file">Локальный файл</string>
