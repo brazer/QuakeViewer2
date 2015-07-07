@@ -23,5 +23,6 @@
     <string name="map_activity_title">Quakes</string>
     <string name="first_message">You can set a map in settings. Internet is need to initialise data. </string>
     <string name="title_first_message">First start</string>
+    <string name="deselect_file">Deselect file</string>
 
 </resources>

@@ -80,7 +80,9 @@ public class MainActivity extends ActionBarActivity
         fileDialog = new OpenFileDialog(this);
         Drawable folderIcon = getResources().getDrawable(R.drawable.ic_folder_black_48dp);
         fileDialog.setFolderIcon(folderIcon);
-        fileDialog.setFilter("$s.dbf");
+        Drawable fileIcon = getResources().getDrawable(R.drawable.ic_file_download_black_48dp);
+        fileDialog.setFileIcon(fileIcon);
+        fileDialog.setFilter(".+\\.(dbf)");
         if (savedInstanceState!=null) {
             OpenFileDialog.setIsClosed(savedInstanceState.getBoolean("isClosed"));
             mQuakeAdapter = (QuakeAdapter) savedInstanceState.getSerializable("adapter");
@@ -131,7 +133,6 @@ public class MainActivity extends ActionBarActivity
                 dlgAlert.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        System.exit(-1);
                     }
                 });
                 dlgAlert.setCancelable(true);
