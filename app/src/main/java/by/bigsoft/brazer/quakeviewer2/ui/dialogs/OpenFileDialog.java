@@ -37,12 +37,12 @@ public class OpenFileDialog extends AlertDialog.Builder {
 
     private final String TAG_LOG = "OpenFileDialog";
     private String currentPath = Environment.getExternalStorageDirectory().getPath();
-    private FilenameFilter filenameFilter;
+    private static FilenameFilter filenameFilter;
     private List<File> files = new ArrayList<File>();
     private TextView title;
     private ListView listView;
-    private Drawable folderIcon;
-    private Drawable fileIcon;
+    private static Drawable folderIcon;
+    private static Drawable fileIcon;
     private int selectedIndex = -1;
     private OpenDialogListener listener;
     private String accessDeniedMessage;
@@ -297,7 +297,6 @@ public class OpenFileDialog extends AlertDialog.Builder {
 
     public OpenFileDialog setFilter(final String filter) {
         filenameFilter = new FilenameFilter() {
-
             @Override
             public boolean accept(File file, String fileName) {
                 File tempFile = new File(String.format("%s/%s", file.getPath(), fileName));
@@ -310,12 +309,12 @@ public class OpenFileDialog extends AlertDialog.Builder {
     }
 
     public OpenFileDialog setFolderIcon(Drawable drawable) {
-        this.folderIcon = drawable;
+        folderIcon = drawable;
         return this;
     }
 
     public OpenFileDialog setFileIcon(Drawable drawable) {
-        this.fileIcon = drawable;
+        fileIcon = drawable;
         return this;
     }
 

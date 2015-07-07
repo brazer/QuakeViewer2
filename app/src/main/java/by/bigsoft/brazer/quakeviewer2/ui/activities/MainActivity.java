@@ -78,10 +78,9 @@ public class MainActivity extends ActionBarActivity
         initFirst();
         initDB();
         fileDialog = new OpenFileDialog(this);
-        Drawable folderIcon = this.getResources().getDrawable(android.R.drawable.gallery_thumb); //todo
+        Drawable folderIcon = getResources().getDrawable(R.drawable.ic_folder_black_48dp);
         fileDialog.setFolderIcon(folderIcon);
-        //todo: fileDialog.setFilter("*.dbf");
-        //todo: file icon
+        fileDialog.setFilter("$s.dbf");
         if (savedInstanceState!=null) {
             OpenFileDialog.setIsClosed(savedInstanceState.getBoolean("isClosed"));
             mQuakeAdapter = (QuakeAdapter) savedInstanceState.getSerializable("adapter");
@@ -150,7 +149,7 @@ public class MainActivity extends ActionBarActivity
                 @Override
                 public void onTaskComplete(JdbfTask task) {
                     if (JdbfTask.records==null) {
-                        Toast.makeText(getContext(), "Please, check internet connection", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Please, check internet connection", Toast.LENGTH_SHORT).show();
                         manBLR.onCancel(null);
                     } else {
                         for (JdbfTask.QuakeRecord rec : JdbfTask.records)

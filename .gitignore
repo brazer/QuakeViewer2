@@ -26,4 +26,8 @@ proguard/
 *.log
 
 QuakeViewer2.iml
+lib/build
+lib/gen
 lib/lib.iml
+.idea/
+gradle/wrapper/gradle-wrapper.properties
