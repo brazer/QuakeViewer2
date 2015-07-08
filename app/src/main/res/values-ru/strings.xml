@@ -23,5 +23,6 @@
     <string name="first_message">В настройках можете выбрать карту. Для инициализации данных необходим интернет.</string>
     <string name="title_first_message">Первый запуск</string>
     <string name="deselect_file">Снимите выделение с файла</string>
+    <string name="title_euro">Европа</string>
 
 </resources>

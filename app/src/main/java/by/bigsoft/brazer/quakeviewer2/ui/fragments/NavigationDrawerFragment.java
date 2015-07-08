@@ -108,6 +108,7 @@ public class NavigationDrawerFragment extends Fragment {
                 android.R.id.text1,
                 new String[]{
                         getString(R.string.title_earth),
+                        getString(R.string.title_euro),
                         getString(R.string.title_belarus),
                         getString(R.string.title_section_local_file)
                 }));
@@ -256,7 +257,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         if (item.getItemId() == R.id.action_show_all) {
             int all = -1;
-            MainActivity.showQuakes(/*QuakeContent.QUAKES*/all);
+            MainActivity.showQuakes(all);
             return true;
         }
 

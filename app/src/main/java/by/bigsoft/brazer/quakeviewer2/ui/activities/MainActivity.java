@@ -143,7 +143,15 @@ public class MainActivity extends ActionBarActivity
                 public void onTaskComplete(JdbfTask task) {
                     if (JdbfTask.records==null) return;
                     for (JdbfTask.QuakeRecord rec : JdbfTask.records)
-                        DataBaseHelper.addQuake(rec);
+                        DataBaseHelper.addEvent((JdbfTask.QuakeRecordBLR) rec);
+                }
+            });
+            final AsyncTaskManager manEuro = new AsyncTaskManager(this, new OnTaskCompleteListener() {
+                @Override
+                public void onTaskComplete(JdbfTask task) {
+                    if (JdbfTask.records==null) return;
+                    for (JdbfTask.QuakeRecord rec : JdbfTask.records)
+                        DataBaseHelper.addQuake((JdbfTask.QuakeRecordEarth) rec, DataBaseHelper.tabEurope);
                 }
             });
             AsyncTaskManager manEarth = new AsyncTaskManager(this, new OnTaskCompleteListener() {
@@ -152,9 +160,10 @@ public class MainActivity extends ActionBarActivity
                     if (JdbfTask.records==null) {
                         Toast.makeText(getApplicationContext(), "Please, check internet connection", Toast.LENGTH_SHORT).show();
                         manBLR.onCancel(null);
+                        manEuro.onCancel(null);
                     } else {
                         for (JdbfTask.QuakeRecord rec : JdbfTask.records)
-                            DataBaseHelper.addQuake(rec);
+                            DataBaseHelper.addQuake((JdbfTask.QuakeRecordEarth) rec, DataBaseHelper.tabEarth);
                         DataBaseTask.setOnTaskCompleteListener(PlaceholderFragment.getPlaceholderFragment());
                     }
                     mSharedPreferences.edit().putBoolean("first_start", false).commit();
@@ -162,6 +171,7 @@ public class MainActivity extends ActionBarActivity
                 }
             });
             manEarth.setupTask(new JdbfTask(getResources()), Constants.URL_EARTH);
+            manEuro.setupTask(new JdbfTask(getResources()), Constants.URL_EUROPE);
             manBLR.setupTask(new JdbfTask(getResources()), Constants.URL_BLR);
         }
     }
@@ -216,9 +226,12 @@ public class MainActivity extends ActionBarActivity
                 mTitle = getString(R.string.title_earth);
                 break;
             case 2:
-                mTitle = getString(R.string.title_belarus);
+                mTitle = getString(R.string.title_euro);
                 break;
             case 3:
+                mTitle = getString(R.string.title_belarus);
+                break;
+            case 4:
                 mTitle = getString(R.string.title_section_local_file);
                 break;
         }
@@ -270,7 +283,8 @@ public class MainActivity extends ActionBarActivity
         );
         if (map==Constants.Map.Maps_ME.ordinal()) {
             List<QuakeItem> quakes;
-            if (position==-1) quakes = QuakeContent.QUAKES;
+            final int all = -1;
+            if (position==all) quakes = QuakeContent.QUAKES;
             else {
                 quakes = new ArrayList<QuakeItem>();
                 quakes.add(mQuakeAdapter.getItem(position));
@@ -279,7 +293,7 @@ public class MainActivity extends ActionBarActivity
             for (int i = 0; i < quakes.size(); i++)
                 points[i] = quakes.get(i).toMWMPoint();
             final String title = (quakes.size() == 1) ? quakes.get(0).title :
-                    getContext().getResources().getString(R.string.title_activity_map);
+                    getContext().getResources().getString(R.string.map_activity_title);
             MapsWithMeApi.showPointsOnMap(mActivity, title, points);
         }
         if (map==Constants.Map.Google_Maps.ordinal()) {
@@ -310,7 +324,7 @@ public class MainActivity extends ActionBarActivity
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        int pos = (mSectionNumber==3) ? position : position - 1;
+                        int pos = (mSectionNumber==4) ? position : position - 1;
                         MainActivity.showQuakes(pos);
                     }
                 };
@@ -342,7 +356,7 @@ public class MainActivity extends ActionBarActivity
                 Bundle savedInstanceState) {
             Log.d(TAG_LOG, "onCreateView");
             View rootView;
-            if (mSectionNumber==3) {
+            if (mSectionNumber==4) {
                 rootView = inflater.inflate(R.layout.fragment_main_common_list, container, false);
                 commonList = (ListView) rootView.findViewById(R.id.common_listview);
                 commonList.setOnItemClickListener(itemClickListener);
@@ -371,6 +385,15 @@ public class MainActivity extends ActionBarActivity
                         });
                         break;
                     case 2:
+                        new DataBaseTask().execute(2);
+                        pullToRefreshlist.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
+                            @Override
+                            public void onRefresh() {
+                                new GetDataTask().execute(Constants.URL_EUROPE);
+                            }
+                        });
+                        break;
+                    case 3:
                         new DataBaseTask().execute(1);
                         pullToRefreshlist.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
                             @Override
@@ -419,7 +442,7 @@ public class MainActivity extends ActionBarActivity
             }
             if (!QuakeContent.init()) return;
             mQuakeAdapter = new QuakeAdapter(getContext(), QuakeContent.QUAKES);
-            if (mSectionNumber == 3) commonList.setAdapter(mQuakeAdapter);
+            if (mSectionNumber == 4) commonList.setAdapter(mQuakeAdapter);
             else pullToRefreshlist.setAdapter(mQuakeAdapter);
         }
 
@@ -427,7 +450,7 @@ public class MainActivity extends ActionBarActivity
         public void OnTaskComplete() {
             Log.d(TAG_LOG, "onTaskComplete");
             mQuakeAdapter = new QuakeAdapter(getContext(), QuakeContent.QUAKES);
-            if (mSectionNumber == 3) Log.e(TAG_LOG, "The section number is wrong.");
+            if (mSectionNumber == 4) Log.e(TAG_LOG, "The section number is wrong.");
             else pullToRefreshlist.setAdapter(mQuakeAdapter);
         }
 
@@ -467,12 +490,21 @@ public class MainActivity extends ActionBarActivity
                 super.onPostExecute(result);
                 if (result) {
                     taskCompleteListener.onTaskComplete(this);
-                    if (mSectionNumber-1==Constants.Area.EARTH.ordinal())
+                    if (mSectionNumber-1==Constants.Area.EARTH.ordinal()) {
                         DataBaseHelper.deleteRecords(Constants.Area.EARTH);
-                    if (mSectionNumber-1==Constants.Area.BELARUS.ordinal())
+                        for (QuakeRecord rec : GetDataTask.records)
+                            DataBaseHelper.addQuake((QuakeRecordEarth) rec, DataBaseHelper.tabEarth);
+                    }
+                    if (mSectionNumber-1==Constants.Area.EUROPE.ordinal()) {
+                        DataBaseHelper.deleteRecords(Constants.Area.EUROPE);
+                        for (QuakeRecord rec : GetDataTask.records)
+                            DataBaseHelper.addQuake((QuakeRecordEarth) rec, DataBaseHelper.tabEurope);
+                    }
+                    if (mSectionNumber-1==Constants.Area.BELARUS.ordinal()) {
                         DataBaseHelper.deleteRecords(Constants.Area.BELARUS);
-                    for (QuakeRecord rec : GetDataTask.records)
-                        DataBaseHelper.addQuake(rec);
+                        for (QuakeRecord rec : GetDataTask.records)
+                            DataBaseHelper.addEvent((QuakeRecordBLR) rec);
+                    }
                 } else
                     Toast.makeText(getContext(), "Data weren't updated :(", Toast.LENGTH_LONG)
                             .show();

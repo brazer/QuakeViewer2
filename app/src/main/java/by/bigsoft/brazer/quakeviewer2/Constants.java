@@ -7,6 +7,6 @@ public class Constants {
     public static final String URL_EUROPE = sBaseUrl + "europe.dbf";
     public static final String URL_BLR = sBaseUrl + "belarus.dbf";
 
-    public enum Area { EARTH, BELARUS }
+    public enum Area { EARTH, EUROPE, BELARUS }
     public enum Map { Google_Maps, Maps_ME }
 }

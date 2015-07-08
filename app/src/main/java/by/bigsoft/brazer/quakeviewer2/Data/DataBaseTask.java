@@ -24,11 +24,15 @@ public class DataBaseTask extends AsyncTask<Integer, Void, Cursor>{
         switch (params[0]) {
             case 0:
                 isBelarus = false;
-                cursor = DataBaseHelper.getQuakes();
+                cursor = DataBaseHelper.getQuakes(DataBaseHelper.tabEarth);
                 break;
             case 1:
                 isBelarus = true;
                 cursor = DataBaseHelper.getBelarusEvents();
+                break;
+            case 2:
+                isBelarus = false;
+                cursor = DataBaseHelper.getQuakes(DataBaseHelper.tabEurope);
                 break;
         }
         return cursor;
