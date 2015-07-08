@@ -434,7 +434,7 @@ public class MainActivity extends ActionBarActivity
         @Override
         public void OnSelectedFile(String fileName) {
             Log.d(TAG_LOG, "OnSelectedFile");
-            if (!fileName.contains("dbf")) {
+            if (!fileName.contains(".dbf")) {
                 Toast.makeText(
                         getContext(),
                         getString(R.string.choose_file),
