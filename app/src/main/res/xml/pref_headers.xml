@@ -3,7 +3,7 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="by.bigsoft.brazer.quakeviewer2.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="by.bigsoft.brazer.quakeviewer2.ui.activities.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
 
 </preference-headers>

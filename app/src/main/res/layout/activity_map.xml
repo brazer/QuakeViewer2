@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="by.bigsoft.brazer.quakeviewer2.MapActivity">
+    tools:context="by.bigsoft.brazer.quakeviewer2.ui.activities.MapActivity">
 
     <fragment
         android:layout_width="wrap_content"

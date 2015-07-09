@@ -1,4 +1,4 @@
-package by.bigsoft.brazer.quakeviewer2;
+package by.bigsoft.brazer.quakeviewer2.ui.activities;
 
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
@@ -12,6 +12,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import by.bigsoft.brazer.quakeviewer2.R;
 import by.org.cgm.quake.QuakeContent;
 
 public class MapActivity extends ActionBarActivity implements GoogleMap.OnMarkerClickListener {

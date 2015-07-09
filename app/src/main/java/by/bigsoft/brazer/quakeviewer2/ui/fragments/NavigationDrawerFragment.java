@@ -1,4 +1,4 @@
-package by.bigsoft.brazer.quakeviewer2;
+package by.bigsoft.brazer.quakeviewer2.ui.fragments;
 
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
@@ -22,6 +22,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import by.bigsoft.brazer.quakeviewer2.R;
+import by.bigsoft.brazer.quakeviewer2.ui.activities.MainActivity;
+
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
@@ -29,7 +32,7 @@ import android.widget.ListView;
  */
 public class NavigationDrawerFragment extends Fragment {
 
-    private final String TAG_LOG = "NavigationDrawerFragment";
+    private static final String TAG_LOG = NavigationDrawerFragment.class.getSimpleName();
     /**
      * Remember the position of the selected item.
      */
@@ -105,6 +108,7 @@ public class NavigationDrawerFragment extends Fragment {
                 android.R.id.text1,
                 new String[]{
                         getString(R.string.title_earth),
+                        getString(R.string.title_euro),
                         getString(R.string.title_belarus),
                         getString(R.string.title_section_local_file)
                 }));
@@ -253,7 +257,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         if (item.getItemId() == R.id.action_show_all) {
             int all = -1;
-            MainActivity.showQuakes(/*QuakeContent.QUAKES*/all);
+            MainActivity.showQuakes(all);
             return true;
         }
 

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Просмоторщик землетрясений</string>
     <string name="title_earth">Земля</string>
     <string name="title_belarus">Беларусь</string>
     <string name="title_section_local_file">Локальный файл</string>
@@ -23,5 +22,7 @@
     <string name="map_activity_title">Землетрясении</string>
     <string name="first_message">В настройках можете выбрать карту. Для инициализации данных необходим интернет.</string>
     <string name="title_first_message">Первый запуск</string>
+    <string name="deselect_file">Снимите выделение с файла</string>
+    <string name="title_euro">Европа</string>
 
 </resources>

@@ -1,4 +1,4 @@
-package by.bigsoft.brazer.quakeviewer2;
+package by.bigsoft.brazer.quakeviewer2.ui.views;
 
 
 import android.content.Context;
@@ -18,6 +18,8 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
+
+import by.bigsoft.brazer.quakeviewer2.R;
 
 public class PullToRefreshListView extends ListView implements OnScrollListener {
 
@@ -400,7 +402,7 @@ public class PullToRefreshListView extends ListView implements OnScrollListener 
         /**
          * Called when the list should be refreshed.
          * <p>
-         * A call to {@link by.bigsoft.brazer.quakeviewer2.PullToRefreshListView #onRefreshComplete()} is
+         * A call to {@link PullToRefreshListView #onRefreshComplete()} is
          * expected to indicate that the refresh has completed.
          */
         public void onRefresh();

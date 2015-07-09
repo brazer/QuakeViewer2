@@ -1,4 +1,4 @@
-package by.bigsoft.brazer.quakeviewer2;
+package by.bigsoft.brazer.quakeviewer2.data;
 
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -14,7 +14,7 @@ public class DataBaseTask extends AsyncTask<Integer, Void, Cursor>{
         DataBaseTask.completeListener = completeListener;
     }
 
-    interface OnTaskCompleteListener {
+    public interface OnTaskCompleteListener {
         public void OnTaskComplete();
     }
 
@@ -24,11 +24,15 @@ public class DataBaseTask extends AsyncTask<Integer, Void, Cursor>{
         switch (params[0]) {
             case 0:
                 isBelarus = false;
-                cursor = DataBaseHelper.getQuakes();
+                cursor = DataBaseHelper.getQuakes(DataBaseHelper.tabEarth);
                 break;
             case 1:
                 isBelarus = true;
                 cursor = DataBaseHelper.getBelarusEvents();
+                break;
+            case 2:
+                isBelarus = false;
+                cursor = DataBaseHelper.getQuakes(DataBaseHelper.tabEurope);
                 break;
         }
         return cursor;

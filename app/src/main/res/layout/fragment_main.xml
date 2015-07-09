@@ -9,7 +9,7 @@
     tools:context=".MainActivity$PlaceholderFragment"
     android:orientation="vertical">
 
-    <by.bigsoft.brazer.quakeviewer2.PullToRefreshListView
+    <by.bigsoft.brazer.quakeviewer2.ui.views.PullToRefreshListView
         android:id="@+id/pull_to_refresh_list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"/>

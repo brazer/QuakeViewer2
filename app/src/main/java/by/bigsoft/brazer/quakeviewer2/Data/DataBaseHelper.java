@@ -1,4 +1,4 @@
-package by.bigsoft.brazer.quakeviewer2;
+package by.bigsoft.brazer.quakeviewer2.data;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,15 +7,18 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import by.bigsoft.brazer.quakeviewer2.Constants;
 import by.org.cgm.jdbf.JdbfTask;
 
 public class DataBaseHelper extends SQLiteOpenHelper{
 
     private final String TAG_LOG = "DataBaseHelper";
     private static DataBaseHelper mDBHelper;
-    private static String mName = "QuakeDB.db";
-    private static String tabBLR = "Belarus", tabEarth = "Earth", tabEurope = "Europe";
-    private static int mVersion = 3;
+    private final static String mName = "QuakeDB.db";
+    private final static String tabBLR = "Belarus";
+    public final static String tabEarth = "Earth";
+    public final static String tabEurope = "Europe";
+    private final static int mVersion = 3;
 
     public static void newInstance(Context context) {
         mDBHelper = new DataBaseHelper(context, mName, null, mVersion);
@@ -83,9 +86,9 @@ public class DataBaseHelper extends SQLiteOpenHelper{
         onCreate(db);
     }
 
-    public static Cursor getQuakes() {
+    public static Cursor getQuakes(String tabName) {
         return mDBHelper.getReadableDatabase().query(
-                tabEarth,
+                tabName,
                 new String[] {"N", "DateTime", "Latitude", "Longitude", "Depth", "MPSP", "LocationRus", "Location"},
                 null, null, null, null, null
         );
@@ -99,14 +102,7 @@ public class DataBaseHelper extends SQLiteOpenHelper{
         );
     }
 
-    public static void addQuake(JdbfTask.QuakeRecord quake) {
-        if (quake instanceof JdbfTask.QuakeRecordBLR)
-            addEvent((JdbfTask.QuakeRecordBLR) quake);
-        else
-            addQuake((JdbfTask.QuakeRecordEarth) quake);
-    }
-
-    private static void addEvent(JdbfTask.QuakeRecordBLR quake) {
+    public static void addEvent(JdbfTask.QuakeRecordBLR quake) {
         ContentValues contentValues = new ContentValues();
         contentValues.put("N", quake.N);
         contentValues.put("Date", quake.Date);
@@ -122,7 +118,7 @@ public class DataBaseHelper extends SQLiteOpenHelper{
         db.insert(tabBLR, null, contentValues);
     }
 
-    private static void addQuake(JdbfTask.QuakeRecordEarth quake) {
+    public static void addQuake(JdbfTask.QuakeRecordEarth quake, String tabName) {
         ContentValues contentValues = new ContentValues();
         contentValues.put("N", quake.N);
         contentValues.put("DateTime", quake.DateTime);
@@ -135,12 +131,13 @@ public class DataBaseHelper extends SQLiteOpenHelper{
         contentValues.put("Location", quake.Loc);
         contentValues.put("LocationRus", quake.LocRus);
         SQLiteDatabase db = mDBHelper.getWritableDatabase();
-        db.insert(tabEarth, null, contentValues);
+        db.insert(tabName, null, contentValues);
     }
 
     public static void deleteRecords(Constants.Area area) {
         SQLiteDatabase db = mDBHelper.getWritableDatabase();
         if (area==Constants.Area.EARTH) db.delete(tabEarth, null, null);
+        if (area==Constants.Area.EUROPE) db.delete(tabEurope, null, null);
         if (area==Constants.Area.BELARUS) db.delete(tabBLR, null, null);
     }
 

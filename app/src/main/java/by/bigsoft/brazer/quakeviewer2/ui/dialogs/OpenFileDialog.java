@@ -1,4 +1,4 @@
-package by.bigsoft.brazer.quakeviewer2;
+package by.bigsoft.brazer.quakeviewer2.ui.dialogs;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
@@ -10,7 +10,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Environment;
-import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -34,16 +33,18 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import by.bigsoft.brazer.quakeviewer2.R;
+
 public class OpenFileDialog extends AlertDialog.Builder {
 
     private final String TAG_LOG = "OpenFileDialog";
     private String currentPath = Environment.getExternalStorageDirectory().getPath();
-    private FilenameFilter filenameFilter;
+    private static FilenameFilter filenameFilter;
     private List<File> files = new ArrayList<File>();
     private TextView title;
     private ListView listView;
-    private Drawable folderIcon;
-    private Drawable fileIcon;
+    private static Drawable folderIcon;
+    private static Drawable fileIcon;
     private int selectedIndex = -1;
     private OpenDialogListener listener;
     private String accessDeniedMessage;
@@ -173,7 +174,7 @@ public class OpenFileDialog extends AlertDialog.Builder {
     }
 
     private TextView createTitle(Context context) {
-        TextView textView = createTextView(context, android.R.style.TextAppearance_DeviceDefault_DialogWindowTitle);
+        TextView textView = createTextView(context, android.R.style.TextAppearance_DeviceDefault);
         return textView;
     }
 
@@ -244,7 +245,7 @@ public class OpenFileDialog extends AlertDialog.Builder {
 
     private TextView createBackItem(Context context) {
         TextView textView = createTextView(context, android.R.style.TextAppearance_DeviceDefault_Small);
-        Drawable drawable = mContext.getResources().getDrawable(android.R.drawable.ic_menu_directions);
+        Drawable drawable = mContext.getResources().getDrawable(android.R.drawable.ic_menu_revert);
         drawable.setBounds(0, 0, 60, 60);
         textView.setCompoundDrawables(drawable, null, null, null);
         textView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -252,6 +253,14 @@ public class OpenFileDialog extends AlertDialog.Builder {
 
             @Override
             public void onClick(View view) {
+                if (selectedIndex!=-1) {
+                    Toast.makeText(
+                            mContext,
+                            mContext.getString(R.string.deselect_file),
+                            Toast.LENGTH_SHORT
+                    ).show();
+                    return;
+                }
                 File file = new File(currentPath);
                 File parentDirectory = file.getParentFile();
                 if (parentDirectory != null) {
@@ -298,7 +307,6 @@ public class OpenFileDialog extends AlertDialog.Builder {
 
     public OpenFileDialog setFilter(final String filter) {
         filenameFilter = new FilenameFilter() {
-
             @Override
             public boolean accept(File file, String fileName) {
                 File tempFile = new File(String.format("%s/%s", file.getPath(), fileName));
@@ -311,12 +319,12 @@ public class OpenFileDialog extends AlertDialog.Builder {
     }
 
     public OpenFileDialog setFolderIcon(Drawable drawable) {
-        this.folderIcon = drawable;
+        folderIcon = drawable;
         return this;
     }
 
     public OpenFileDialog setFileIcon(Drawable drawable) {
-        this.fileIcon = drawable;
+        fileIcon = drawable;
         return this;
     }
 
