@@ -138,41 +138,6 @@ public class MainActivity extends ActionBarActivity
                 dlgAlert.setCancelable(true);
                 dlgAlert.create().show();
             } else Log.i(TAG_LOG, "Internet is connected. May be :(");
-            final AsyncTaskManager manBLR = new AsyncTaskManager(this, new OnTaskCompleteListener() {
-                @Override
-                public void onTaskComplete(JdbfTask task) {
-                    if (JdbfTask.records==null) return;
-                    for (JdbfTask.QuakeRecord rec : JdbfTask.records)
-                        DataBaseHelper.addEvent((JdbfTask.QuakeRecordBLR) rec);
-                }
-            });
-            final AsyncTaskManager manEuro = new AsyncTaskManager(this, new OnTaskCompleteListener() {
-                @Override
-                public void onTaskComplete(JdbfTask task) {
-                    if (JdbfTask.records==null) return;
-                    for (JdbfTask.QuakeRecord rec : JdbfTask.records)
-                        DataBaseHelper.addQuake((JdbfTask.QuakeRecordEarth) rec, DataBaseHelper.tabEurope);
-                }
-            });
-            AsyncTaskManager manEarth = new AsyncTaskManager(this, new OnTaskCompleteListener() {
-                @Override
-                public void onTaskComplete(JdbfTask task) {
-                    if (JdbfTask.records==null) {
-                        Toast.makeText(getApplicationContext(), "Please, check internet connection", Toast.LENGTH_SHORT).show();
-                        manBLR.onCancel(null);
-                        manEuro.onCancel(null);
-                    } else {
-                        for (JdbfTask.QuakeRecord rec : JdbfTask.records)
-                            DataBaseHelper.addQuake((JdbfTask.QuakeRecordEarth) rec, DataBaseHelper.tabEarth);
-                        DataBaseTask.setOnTaskCompleteListener(PlaceholderFragment.getPlaceholderFragment());
-                    }
-                    mSharedPreferences.edit().putBoolean("first_start", false).commit();
-                    new DataBaseTask().execute(0);
-                }
-            });
-            manEarth.setupTask(new JdbfTask(getResources()), Constants.URL_EARTH);
-            manEuro.setupTask(new JdbfTask(getResources()), Constants.URL_EUROPE);
-            manBLR.setupTask(new JdbfTask(getResources()), Constants.URL_BLR);
         }
     }
 
@@ -376,7 +341,7 @@ public class MainActivity extends ActionBarActivity
                 DataBaseTask.setOnTaskCompleteListener(this);
                 switch (mSectionNumber) {
                     case 1:
-                        if (!MainActivity.isFirstStarted()) new DataBaseTask().execute(0);
+                        new DataBaseTask().execute(0);
                         pullToRefreshlist.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
                             @Override
                             public void onRefresh() {
