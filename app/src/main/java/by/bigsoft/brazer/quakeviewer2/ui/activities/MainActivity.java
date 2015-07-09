@@ -1,14 +1,9 @@
 package by.bigsoft.brazer.quakeviewer2.ui.activities;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -66,7 +61,6 @@ public class MainActivity extends ActionBarActivity
     private static OpenFileDialog fileDialog;
     private static QuakeAdapter mQuakeAdapter;
     private static Activity mActivity;
-    private static SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +69,6 @@ public class MainActivity extends ActionBarActivity
         Log.d(TAG_LOG, "onCreate");
         mContext = this;
         mActivity = this;
-        initFirst();
         initDB();
         fileDialog = new OpenFileDialog(this);
         Drawable folderIcon = getResources().getDrawable(R.drawable.ic_folder_black_48dp);
@@ -101,54 +94,8 @@ public class MainActivity extends ActionBarActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
     }
 
-    private void initFirst() {
-        if (isFirstStarted()) {
-            Log.i(TAG_LOG, "First start");
-            AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
-            dlgAlert.setTitle(getString(R.string.title_first_message));
-            dlgAlert.setMessage(getString(R.string.first_message));
-            dlgAlert.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    showSettings();
-                }
-            });
-            dlgAlert.setCancelable(true);
-            dlgAlert.create().show();
-        }
-    }
-
-    private static boolean isFirstStarted() {
-        mSharedPreferences = getActivity().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
-        return mSharedPreferences.getBoolean("first_start", true);
-    }
-
     private void initDB() {
         DataBaseHelper.newInstance(this);
-        if (isFirstStarted()) {
-            if (!isInternetConnected()) {
-                AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
-                dlgAlert.setTitle(getString(R.string.title_first_message));
-                dlgAlert.setMessage("Check internet connection");
-                dlgAlert.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-                dlgAlert.setCancelable(true);
-                dlgAlert.create().show();
-            } else Log.i(TAG_LOG, "Internet is connected. May be :(");
-        }
-    }
-
-    private boolean isInternetConnected() {
-        ConnectivityManager conMan =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = conMan.getActiveNetworkInfo();
-        if (info==null) return false;
-        if (!info.isConnected()) return false;
-        if (!info.isAvailable()) return false;
-        return true;
     }
 
     public static void showOpenFileDialog(String path) {
@@ -281,7 +228,6 @@ public class MainActivity extends ActionBarActivity
         private static final String ARG_SECTION_NUMBER = "section_number";
         private static final String TAG_LOG = "PlaceHolderFragment";
         private static int mSectionNumber;
-        private static PlaceholderFragment mPlaceholderFragment;
         private static PullToRefreshListView pullToRefreshlist;
         private static ListView commonList;
 
@@ -294,10 +240,6 @@ public class MainActivity extends ActionBarActivity
                     }
                 };
 
-        public static PlaceholderFragment getPlaceholderFragment() {
-            return mPlaceholderFragment;
-        }
-
         /**
          * Returns a new instance of this fragment for the given section
          * number.
@@ -305,7 +247,6 @@ public class MainActivity extends ActionBarActivity
         public static PlaceholderFragment newInstance(int sectionNumber) {
             Log.d(TAG_LOG, "newInstance");
             PlaceholderFragment fragment = new PlaceholderFragment();
-            mPlaceholderFragment = fragment;
             mSectionNumber = sectionNumber;
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -394,9 +335,7 @@ public class MainActivity extends ActionBarActivity
                 Boolean result = null;
                 try {
                     result = task.get();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                 }
                 Toast.makeText(
